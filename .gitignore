@@ -1,0 +1,6 @@
+*.*~
+*.swp
+*.swo
+.build*
+.npm
+settings.json
