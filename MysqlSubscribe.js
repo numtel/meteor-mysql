@@ -1,62 +1,66 @@
 // numtel:mysql
 // MIT License, ben@latenightsketches.com
 
-MysqlSubscribe = function(name /* arguments */){
+var selfConnection;
+
+MysqlSubscribe = function(connection, name /* arguments */){
   var self = this;
+
+  var subscribeArgs;
+  if(typeof connection === 'string'){
+    // Using default connection
+    subscribeArgs = Array.prototype.slice.call(arguments, 0);
+    name = connection;
+    if(Meteor.isClient){
+      connection = Meteor.connection;
+    }else if(Meteor.isServer){
+      if(!selfConnection){
+        selfConnection = DDP.connect(Meteor.absoluteUrl());
+      }
+      connection = selfConnection;
+    }
+  }else{
+    // Subscription arguments does not use the first argument (the connection)
+    subscribeArgs = Array.prototype.slice.call(arguments, 1);
+  }
 
   self.dep = new Tracker.Dependency;
   self._events = { update: [], added: [], changed: [], removed: [] };
 
-  if(Meteor.isClient){
-    Meteor.subscribe.apply(this, arguments);
-  }else if(Meteor.isServer){
-    // TODO: serve!!!!
-    return;
-  }
-
   if(!(self instanceof MysqlSubscribe)){
     throw new Error('use "new" to construct a MysqlSelect');
   }
-  options = _.defaults(options || {}, {
-  });
-  
-  if(options.ddpConnection)
-    self._ddp = options.ddpConnection;
-  else if(Meteor.isClient)
-    self._ddp = Meteor.connection;
-  else
-    self._ddp = Meteor.server;
 
-  if(self._ddp && self._ddp.registerStore){
-    self._ddp.registerStore(name, {
-      beginUpdate: function(batchSize, reset){},
-      update: function(msg){
-        var index = parseInt(msg.id.substr(1), 10);
-        var oldRow;
-        self.dispatchEvent('update', index, msg);
-        switch(msg.msg){
-          case 'added':
-            self.splice(index, 0, msg.fields);
-            self.dispatchEvent(msg.msg, index, msg.fields);
-            break;
-          case 'changed':
-            oldRow = _.clone(self[index]);
-            self[index] = _.extend(self[index], msg.fields);
-            self.dispatchEvent(msg.msg, index, oldRow, self[index]);
-            break;
-          case 'removed':
-            oldRow = _.clone(self[index]);
-            self.splice(index, 1);
-            self.dispatchEvent(msg.msg, index, oldRow);
-            break;
-        }
-        self.dep.changed();
-      },
-      endUpdate: function(){},
-      saveOriginals: function(){},
-      retrieveOriginals: function(){}
-    });
-  }
+  connection.registerStore(name, {
+    beginUpdate: function(batchSize, reset){},
+    update: function(msg){
+      var index = parseInt(msg.id.substr(1), 10);
+      var oldRow;
+      self.dispatchEvent('update', index, msg);
+      switch(msg.msg){
+        case 'added':
+          self.splice(index, 0, msg.fields);
+          self.dispatchEvent(msg.msg, index, msg.fields);
+          break;
+        case 'changed':
+          oldRow = _.clone(self[index]);
+          self[index] = _.extend(self[index], msg.fields);
+          self.dispatchEvent(msg.msg, index, oldRow, self[index]);
+          break;
+        case 'removed':
+          oldRow = _.clone(self[index]);
+          self.splice(index, 1);
+          self.dispatchEvent(msg.msg, index, oldRow);
+          break;
+      }
+      self.dep.changed();
+    },
+    endUpdate: function(){},
+    saveOriginals: function(){},
+    retrieveOriginals: function(){}
+  });
+
+  self.subscription = connection.subscribe.apply(connection, subscribeArgs);
 };
 
 MysqlSubscribe.prototype = new Array();

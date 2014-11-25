@@ -40,7 +40,7 @@ Meteor.publish('playerScore', function(name){
 Reactive live select statements are provided using the `MysqlSubscribe()` constructor. Appearing as an array of rows, a MySQL subscription also provides Tracker dependency and update event handlers.
 
 ```javascript
-// On the client
+// On the client or server
 
 myScore = new MysqlSubscribe('playerScore', 'Maxwell');
 
@@ -49,7 +49,7 @@ myScore.on('update', function(index, msg){
   console.log(msg.fields.score);
 });
 
-// Or use data reactively
+// Or use data reactively (on the client)
 Template.scoreboard.helpers({
   myScore: function () {
     myScore.dep.depend();
@@ -110,13 +110,15 @@ Name | Type | Description
 `table` | `string` | Name of table to hook trigger *(Required)*
 `condition` | `string` or `function` | Specify conditional terms to trigger *(Optional)* Access new row on insert or old row on update/delete using `$ROW` symbol. Example: `$ROW.name = "dude" or $ROW.score > 200`
 
-## Client Implements
+## Client/Server Implements
 
-### `MysqlSubscribe(name, args...)`
+### `MysqlSubscribe(connection, name, args...)`
 
 Constructor for subscribing to a published select statement. No extra call to `Meteor.subscribe()` is required. Specify the name of the subscription along with any arguments.
 
-The class inherits from a normal array but with the following extra methods:
+The first argument, `connection`, is optional. If not specified and the first argument is the name of the subscription, the default Meteor server connection will be used. If connecting to a different Meteor server, pass the DDP connection object in this first argument.
+
+The class inherits from a normal array but with the following extra methods and properties:
 
 #### `on(eventName, handler)`
 
@@ -141,13 +143,16 @@ Dispatch the handlers for a given event.
 
 `Tracker.Dependency` object
 
-* Call `subscription.dep.depend()` in a template helper to ensure reactive updating.
-* Call `subscription.dep.changed()` to signal new data in the array. This is automatically called when the query updates.
+* Call `myLiveSelect.dep.depend()` in a template helper to ensure reactive updating.
+* Call `myLiveSelect.dep.changed()` to signal new data in the array. This is automatically called when the query updates.
+
+#### `subscription`
+
+Reference to Meteor subscription object with `ready()` and `stop()` methods.
 
 ## TODO
 
 * Automated testing
-* Support for `MysqlSubscribe()` on server
 
 ## License
 

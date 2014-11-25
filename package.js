@@ -1,7 +1,7 @@
 Package.describe({
   name: 'numtel:mysql',
   summary: 'MySQL support with Reactive Select Subscriptions',
-  version: '0.0.1',
+  version: '0.0.2',
   git: 'https://github.com/numtel/meteor-mysql.git'
 });
 
@@ -30,5 +30,5 @@ Package.onUse(function(api) {
 
 Package.onTest(function(api) {
   api.use('tinytest');
-  api.use('numtel:mysql-select');
+  api.use('numtel:mysql');
 });

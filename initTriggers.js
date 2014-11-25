@@ -14,6 +14,9 @@ initTriggers = function(list){
 
   // Add triggers to buffer if not already existing
   list.forEach(function(def){
+    if(def.condition && typeof def.condition === 'function'){
+      def.condition = def.condition(esc, escId);
+    }
     for(var i = 0; i<buffer.length; i++){
       if(buffer[i].conn === conn &&
           buffer[i].table === def.table &&
@@ -33,11 +36,10 @@ initTriggers = function(list){
     }
   });
 
-  // Update triggers on changed tables
-  removeTriggers(conn, updatedTables);
   // Create new triggers from buffer
-  var updateKeys = getUpdateKeys(conn);
+  var updateKeys;
   updatedTables.forEach(function(table){
+    if(!updateKeys) updateKeys = getUpdateKeys(conn);
     var triggerDefs = buffer.filter(function(entry){
       return entry.table === table;
     });
@@ -69,6 +71,10 @@ initTriggers = function(list){
       }
     });
     TRIGGER_EVENTS.forEach(function(event){
+      // Force out any competing triggers
+      var currentTrigger = getTriggerName(conn, table, event);
+      if(currentTrigger) removeTrigger(conn, currentTrigger);
+
       createTrigger(conn, table, conditionString, event);
     });
   });
@@ -96,13 +102,18 @@ createTrigger = function(conn, table, body, event){
   });
 };
 
-removeTriggers = function(conn, tables){
-  var result = conn.queryEx('show triggers;');
-  result.forEach(function(row){
-    if(tables.indexOf(row.Table) > -1 && row.Timing === 'AFTER'){
-      removeTrigger(conn, row.Trigger);
-    };
+getTriggerName = function(conn, table, event){
+  var result = conn.queryEx(function(esc, escId){
+    return [
+      "SELECT TRIGGER_NAME",
+      "FROM information_schema.TRIGGERS",
+      "WHERE TRIGGER_SCHEMA = SCHEMA()",
+      "AND EVENT_OBJECT_TABLE = " + esc(table),
+      "AND ACTION_TIMING = 'AFTER'",
+      "AND EVENT_MANIPULATION = " + esc(event)
+    ].join('\n');
   });
+  return result.length > 0 ? result[0].TRIGGER_NAME : null;
 };
 
 removeTrigger = function(conn, name){

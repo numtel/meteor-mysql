@@ -27,6 +27,7 @@ syncSelect = function(subscription, options){
   selectBuffer.push(selectMeta);
   // Perform first update
   updateSubscription.apply(selectMeta, updateArgs);
+  subscription.ready();
 };
 
 var insertConnIntoBuffer = function(conn){
@@ -67,7 +68,10 @@ var managePoll = function(){
     selectBuffer.forEach(function(selectMeta){
       if(selectMeta.conn === connMeta.conn){
         _.each(selectMeta.updateKeys, function(updateArgs, updateKey){
-          updateSubscription.apply(selectMeta, updateArgs);
+          updateKey = parseInt(updateKey, 10);
+          if(updatedKeys.indexOf(updateKey) !== -1){
+            updateSubscription.apply(selectMeta, updateArgs);
+          }
         });
       }
     });
