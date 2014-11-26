@@ -1,68 +1,11 @@
 # numtel:mysql
 Reactive MySQL for Meteor
 
-Wrapper of the [MySQL NPM module](https://www.npmjs.org/package/mysql) with a few added methods.
+Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with a few added methods.
 
-## Quick Start
-
-Add the package to your Meteor application:
-
-```bash
-$ meteor add numtel:mysql
-```
-
-Publish a select statement, specifying when to refresh the query. By utilizing triggers and a highly optimized update table, polling queries are very simple and run quickly.
-
-```javascript
-// On the server
-
-db = mysql.createConnection(mysqlSettings);
-db.connect();
-db.initUpdateTable('updates');
-
-Meteor.publish('playerScore', function(name){
-  db.select(this, {
-    query: function(esc, escId){
-      return 'select `score` from `players` where `name`=' + esc(name);
-    },
-    triggers: [
-      {
-        table: 'players',
-        condition: function(esc, escId){
-          return '$ROW.name = ' + esc(name);
-        }
-      }
-    ]
-  });
-});
-```
-
-Reactive live select statements are provided using the `MysqlSubscribe()` constructor. Appearing as an array of rows, a MySQL subscription also provides Tracker dependency and update event handlers.
-
-```javascript
-// On the client or server
-
-myScore = new MysqlSubscribe('playerScore', 'Maxwell');
-
-// Get updates using event callback
-myScore.on('update', function(index, msg){
-  console.log(msg.fields.score);
-});
-
-// Or use data reactively (on the client)
-Template.scoreboard.helpers({
-  myScore: function () {
-    myScore.dep.depend();
-    return myScore[0].score;
-  }
-});
-
-```
-
-## Related Repositories
-
-* [numtel:method-expectations](https://github.com/numtel/meteor-method-expectations) - Provide instantaneous client feedback for long running Meteor methods (e.g. `INSERT` and `UPDATE` SQL queries)
-* [mysql-leaderboard](https://github.com/numtel/meteor-mysql-leaderboard) - Meteor Leaderboard example modified to use MySQL server
+* [Quick tutorial on using this package](getting_started.md)
+* [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
+* [Explanation of the implementation design process](context.md)
 
 ## Server Implements
 
@@ -78,7 +21,7 @@ If you are currently using the `pcel:mysql` package, the interface will be exact
 
 Perform any query synchronously and return the result. The single argument may contain a string or a function. A function may be passed that accepts two arguments. See example:
 
-```javacscript
+```javascript
 var result = db.queryEx(function(esc, escId){
   return 'update ' + escId(table) +
          ' set `score`=`score` + ' + esc(amount) +
@@ -96,14 +39,17 @@ This method must be called before any calls to `connection.select()`.
 
 ### `connection.select(subscription, options)`
 
-Bind a select statement to a subscription object. Both options are required:
+Bind a select statement to a subscription object (e.g. context of a `Meteor.publish()` function). The first two options are required:
 
 Option | Type | Description
 ------|-------|--------------
 `query`|`string` or `function` | Query to perform (queryEx syntax)
 `triggers`|`array`| Description of triggers to refresh query
+`pollInterval` | `number` | Poll delay duration in milliseconds (Optional)
 
-Eacu trigger object may contain the following properties:
+Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 1000 ms. An interval too short may introduce erratic updates.
+
+Each trigger object may contain the following properties:
 
 Name | Type | Description
 -----|-------| --------
@@ -112,13 +58,13 @@ Name | Type | Description
 
 ## Client/Server Implements
 
-### `MysqlSubscribe(connection, name, args...)`
+### `MysqlSubscribe([connection,] name, [args...])`
 
 Constructor for subscribing to a published select statement. No extra call to `Meteor.subscribe()` is required. Specify the name of the subscription along with any arguments.
 
 The first argument, `connection`, is optional. If not specified and the first argument is the name of the subscription, the default Meteor server connection will be used. If connecting to a different Meteor server, pass the DDP connection object in this first argument.
 
-The class inherits from a normal array but with the following extra methods and properties:
+The prototype inherits from `Array`, extended with the following extra methods and properties:
 
 #### `on(eventName, handler)`
 
@@ -149,10 +95,6 @@ Dispatch the handlers for a given event.
 #### `subscription`
 
 Reference to Meteor subscription object with `ready()` and `stop()` methods.
-
-## TODO
-
-* Automated testing
 
 ## License
 

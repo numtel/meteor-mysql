@@ -13,22 +13,36 @@ Package.onUse(function(api) {
   api.versionsFrom('1.0');
   api.use([
     'underscore',
-    'ddp'
+    'ddp',
+    'tracker'
   ]);
   api.addFiles([
-    'murmurhash3_gc.js',
-    'initTriggers.js',
-    'syncSelect.js',
-    'mysql.js'
+    'dist/murmurhash3_gc.js',
+    'lib/initTriggers.js',
+    'lib/syncSelect.js',
+    'lib/mysql.js'
   ], 'server');
   api.addFiles([
-    'MysqlSubscribe.js'
+    'lib/MysqlSubscribe.js'
   ], ['client', 'server']);
   api.export('mysql', 'server'); // node-mysql with extra methods
   api.export('MysqlSubscribe');
 });
 
 Package.onTest(function(api) {
-  api.use('tinytest');
-  api.use('numtel:mysql');
+  api.use([
+    'tinytest',
+    'underscore',
+    'numtel:mysql'
+  ]);
+  api.addFiles([
+    'test/helper.expectResult.js'
+  ]);
+  api.addFiles([
+    'test/mock.connection.query.js',
+    'test/mysql.js'
+  ], 'server');
+  api.addFiles([
+    'test/MysqlSubscribe.js'
+  ]);
 });
