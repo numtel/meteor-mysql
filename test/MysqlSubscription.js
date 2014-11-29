@@ -1,11 +1,11 @@
 // numtel:mysql
 // MIT License, ben@latenightsketches.com
-// test/MysqlSubscribe.js
+// test/MysqlSubscription.js
 
 var POLL_WAIT = 1000 + 200; // test/mysql.js :: POLL_INTERVAL + allowance
 
-players = new MysqlSubscribe('allPlayers');
-myScore = new MysqlSubscribe('playerScore', 'Maxwell');
+players = new MysqlSubscription('allPlayers');
+myScore = new MysqlSubscription('playerScore', 'Maxwell');
 
 var expectedRows = [ // test/mysql.js :: insertSampleData()
   { name: 'Planck', score: 70 },
@@ -17,7 +17,7 @@ var expectedRows = [ // test/mysql.js :: insertSampleData()
 // TODO count queries
 // TODO simulate many connections
 
-Tinytest.addAsync('numtel:mysql - MysqlSubscribe initialization',
+Tinytest.addAsync('numtel:mysql - MysqlSubscription initialization',
 function(test, done){
   var updateCount = 0;
   test.equal(typeof players.length, 'number');
@@ -30,7 +30,7 @@ function(test, done){
   }, POLL_WAIT);
 });
 
-Tinytest.addAsync('numtel:mysql - MysqlSubscribe added/deleted row',
+Tinytest.addAsync('numtel:mysql - MysqlSubscription added/deleted row',
 function(test, done){
   var newPlayer = 'Archimedes';
   Meteor.call('getQueries', function(error, startQueries){
@@ -55,7 +55,7 @@ function(test, done){
   });
 });
 
-Tinytest.addAsync('numtel:mysql - MysqlSubscribe conditional trigger + changed',
+Tinytest.addAsync('numtel:mysql - MysqlSubscription conditional trigger + changed',
 function(test, done){
   Meteor.setTimeout(function(){
     test.equal(myScore.length, 1);

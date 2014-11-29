@@ -23,10 +23,10 @@ Package.onUse(function(api) {
     'lib/mysql.js'
   ], 'server');
   api.addFiles([
-    'lib/MysqlSubscribe.js'
+    'lib/MysqlSubscription.js'
   ], ['client', 'server']);
   api.export('mysql', 'server'); // node-mysql with extra methods
-  api.export('MysqlSubscribe');
+  api.export('MysqlSubscription');
 });
 
 Package.onTest(function(api) {
@@ -43,6 +43,6 @@ Package.onTest(function(api) {
     'test/mysql.js'
   ], 'server');
   api.addFiles([
-    'test/MysqlSubscribe.js'
+    'test/MysqlSubscription.js'
   ]);
 });

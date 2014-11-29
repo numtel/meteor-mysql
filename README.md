@@ -58,11 +58,11 @@ Name | Type | Description
 
 ## Client/Server Implements
 
-### `MysqlSubscribe([connection,] name, [args...])`
+### `MysqlSubscription([connection,] name, [args...])`
 
 Constructor for subscribing to a published select statement. No extra call to `Meteor.subscribe()` is required. Specify the name of the subscription along with any arguments.
 
-The first argument, `connection`, is optional. If not specified and the first argument is the name of the subscription, the default Meteor server connection will be used. If connecting to a different Meteor server, pass the DDP connection object in this first argument.
+The first argument, `connection`, is optional. If connecting to a different Meteor server, pass the DDP connection object in this first argument. If not specified, the first argument becomes the name of the subscription (string) and the default Meteor server connection will be used.
 
 The prototype inherits from `Array`, extended with the following extra methods and properties:
 
