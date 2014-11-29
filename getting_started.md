@@ -32,7 +32,7 @@ Meteor.publish('playerScore', function(name){
 });
 ```
 
-Reactive live select statements are provided using the `MysqlSubscription()` constructor. Appearing as an array of rows, a MySQL subscription also provides Tracker dependency and update event handlers.
+Reactive select statements are accessed on the client and server using the `MysqlSubscription()` constructor. Appearing as an array of rows, a MySQL subscription also provides Tracker dependency and event handling.
 
 ```javascript
 // On the client or server
@@ -40,15 +40,14 @@ Reactive live select statements are provided using the `MysqlSubscription()` con
 myScore = new MysqlSubscription('playerScore', 'Maxwell');
 
 // Get updates using event callback
-myScore.on('update', function(index, msg){
+myScore.addEventListener('update', function(index, msg){
   console.log(msg.fields.score);
 });
 
 // Or use data reactively (on the client)
 Template.scoreboard.helpers({
   myScore: function () {
-    myScore.dep.depend();
-    return myScore[0].score;
+    return myScore.reactive()[0].score;
   }
 });
 

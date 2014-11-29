@@ -11,11 +11,11 @@ Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with a 
 
 ### `mysql`
 
-The `mysql` object is exposed to the server side of your application when this package is installed.
+The `mysql` module is exposed to the server side of your application when this package is installed.
 
-See the [MySQL NPM module documentation on GitHub](https://github.com/felixge/node-mysql) for very detailed instructions on this object.
+See the [MySQL NPM module documentation on GitHub](https://github.com/felixge/node-mysql) for very detailed instructions on this module.
 
-If you are currently using the `pcel:mysql` package, the interface will be exactly the same except for the following methods which are added to each connection.
+If you are currently using the `pcel:mysql` package, the interface will be exactly the same except for the following methods which are added to each connection:
 
 ### `connection.queryEx(query)`
 
@@ -39,22 +39,26 @@ This method must be called before any calls to `connection.select()`.
 
 ### `connection.select(subscription, options)`
 
-Bind a select statement to a subscription object (e.g. context of a `Meteor.publish()` function). The first two options are required:
+Bind a SQL select statement to a subscription object (e.g. context of a `Meteor.publish()` function).
 
-Option | Type | Description
-------|-------|--------------
-`query`|`string` or `function` | Query to perform (queryEx syntax)
-`triggers`|`array`| Description of triggers to refresh query
-`pollInterval` | `number` | Poll delay duration in milliseconds (Optional)
-
-Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 1000 ms. An interval too short may introduce erratic updates.
+Option | Type | Required | Description
+------|-------|-----------|--------------
+`query`|`string` or `function` | Required | Query to perform
+`triggers`|`array`| Required | Description of triggers to refresh query
+`pollInterval` | `number` | Optional | Poll delay duration in milliseconds
 
 Each trigger object may contain the following properties:
 
-Name | Type | Description
------|-------| --------
-`table` | `string` | Name of table to hook trigger *(Required)*
-`condition` | `string` or `function` | Specify conditional terms to trigger *(Optional)* Access new row on insert or old row on update/delete using `$ROW` symbol. Example: `$ROW.name = "dude" or $ROW.score > 200`
+Name | Type | Required | Description
+-----|-------| --------|--------------
+`table` | `string` | Required | Name of table to hook trigger
+`condition` | `string` or `function` | Optional | Access new row on insert or old row on update/delete using `$ROW`<br><br>*Example:*<br>`$ROW.name = "dude" or $ROW.score > 200`
+
+**Notes:**
+
+* When a function is allowed in place of a string, use the `queryEx()` argument structure to escape values and identifiers.
+
+* Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 1000 ms. An interval too short may introduce erratic updates.
 
 ## Client/Server Implements
 
@@ -64,37 +68,35 @@ Constructor for subscribing to a published select statement. No extra call to `M
 
 The first argument, `connection`, is optional. If connecting to a different Meteor server, pass the DDP connection object in this first argument. If not specified, the first argument becomes the name of the subscription (string) and the default Meteor server connection will be used.
 
-The prototype inherits from `Array`, extended with the following extra methods and properties:
+The prototype inherits from `Array` and is extended with the following methods:
 
-#### `on(eventName, handler)`
+Name | Description
+-----|--------------------------
+`addEventListener(eventName, listener)` | Bind a listener function to this subscription
+`removeEventListener(eventName)` | Remove listener functions from an event queue
+`dispatchEvent(eventName, [args...])` | Call the listeners for a given event, returns boolean
+`depend()` | Call from inside of a Template helper function to ensure reactive updates
+`reactive()` | Same as `depend()` except returns self
+`changed()`| Signal new data in the subscription
+`ready()` | Return boolean value corresponding to subscription fully loaded
+`stop()` | Stop updates for this subscription
 
-Bind a handler function to one of the available events on this subscription:
+**Notes:**
 
-* `update` Called on all changes to the data, before the array is updated. Handler accepts 2 arguments: `index` (Index in subscription array) and `msg` (DDP message received).
-* `added` Called when a row is inserted to the data, after array is updated. Handler accepts 2 arguments: `index` and `newRow`.
-* `changed` Called when a row is changed, after array is updated. Handler accepts 3 arguments: `index`, `oldRow`, and `newRow`.
-* `removed` Called when a row is removed from the data, after array is updated. Handler accepts 2 arguments: `index` and `oldRow`.
+* `changed()` is automatically called when the query updates and is most likely to only be called manually from a method stub on the client.
+* Event listener methods are similar to native methods. For example, if an event listener returns `false` exactly, it will halt listeners of the same event that have been added previously. A few differences do exist though to make usage easier in this context:
+  * The event name may also contain an identifier suffix using dot namespacing (e.g. `update.myEvent`) to allow removing/dispatching only a subset of listeners.
+  * `removeEventListener()` and `dispatchEvent()` both refer to listeners by name only. Regular expessions allowed.
+  * `useCapture` argument is not available.
 
-If an event handler returns `false` exactly, it will halt further events of the same type.
+#### Event Types
 
-#### `removeHandler(eventName, handler)`
-
-Remove a handler function from an event queue. Pass the function itself as the `handler` argument.
-
-#### `dispatchEvent(eventName)`
-
-Dispatch the handlers for a given event.
-
-#### `dep`
-
-`Tracker.Dependency` object
-
-* Call `myLiveSelect.dep.depend()` in a template helper to ensure reactive updating.
-* Call `myLiveSelect.dep.changed()` to signal new data in the array. This is automatically called when the query updates.
-
-#### `subscription`
-
-Reference to Meteor subscription object with `ready()` and `stop()` methods.
+Name | Listener Arguments | Description
+-----|-------------------|-----------------------
+`update` | `index, msg` | Any difference, before update
+`added` | `index, newRow` | Row inserted, after update
+`changed` | `index, oldRow, newRow` | Row updated, after update
+`removed` | `index, oldRow` | Row removed, after update
 
 ## License
 
