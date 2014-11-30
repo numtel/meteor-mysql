@@ -1,4 +1,4 @@
-# numtel:mysql
+# numtel:mysql [![Build Status](https://travis-ci.org/numtel/meteor-mysql.svg?branch=master)](https://travis-ci.org/numtel/meteor-mysql)
 Reactive MySQL for Meteor
 
 Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with a few added methods.
@@ -97,6 +97,26 @@ Name | Listener Arguments | Description
 `added` | `index, newRow` | Row inserted, after update
 `changed` | `index, oldRow, newRow` | Row updated, after update
 `removed` | `index, oldRow` | Row removed, after update
+
+## Running Tests
+
+A MySQL server is required to run the test suite.
+
+```bash
+# Install Meteor
+$ curl -L https://install.meteor.com/ | /bin/sh
+
+# Clone Repository
+$ git clone https://github.com/numtel/meteor-mysql.git
+$ cd meteor-mysql
+
+# Configure database settings in your favorite editor
+# (an empty database is suggested)
+$ ed test/settings.local.json
+
+# Run test server
+$ meteor test-packages --settings test/settings.local.json ./
+```
 
 ## License
 

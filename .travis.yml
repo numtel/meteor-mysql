@@ -1,0 +1,8 @@
+language: node_js
+env: TEST_COMMAND=./travis.sh
+node_js:
+  - "0.10"
+before_install:
+  - "curl -L http://git.io/ejPSng | /bin/sh"
+before_script:
+  - mysql -e 'create database myapp_test;'
