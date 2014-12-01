@@ -13,7 +13,10 @@ Meteor.startup(function(){
 
   var updateTable = 'test_updates';
   db.queryEx(function(esc, escId){
-    return 'drop table if exists' + escId(updateTable);
+    return 'drop table if exists ' + escId(updateTable);
+  });
+  db.queryEx(function(esc, escId){
+    return 'drop function if exists ' + escId(updateTable + '_next');
   });
   db.initUpdateTable(updateTable);
 
@@ -104,14 +107,14 @@ Tinytest.add(SUITE_PREFIX + 'initUpdateTable', function(test){
     return 'show columns from ' + escId(table);
   }), [
     { Field: 'key', Type: 'int(10) unsigned', Key: 'PRI' },
-    { Field: 'last_update', Type: 'timestamp', Key: 'MUL' }
+    { Field: 'update', Type: 'bigint(20) unsigned', Key: 'MUL' }
   ]), true, 'Fields incorrect');
 
   test.equal(expectResult(db.queryEx(function(esc, escId){
     return 'show indexes from ' + escId(table);
   }), [
     { Column_name: 'key', Key_name: 'PRIMARY', Non_unique: 0 },
-    { Column_name: 'last_update', Non_unique: 1 }
+    { Column_name: 'update', Non_unique: 1 }
   ]), true, 'Indexes incorrect');
 });
 

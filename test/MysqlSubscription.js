@@ -6,6 +6,7 @@
 
 var SUITE_PREFIX = 'numtel:mysql - MysqlSubscription - ';
 var POLL_WAIT = 1000 + 200; // test/mysql.js :: POLL_INTERVAL + allowance
+var LOAD_COUNT = 10;
 
 players = new MysqlSubscription('allPlayers');
 myScore = new MysqlSubscription('playerScore', 'Maxwell');
@@ -19,7 +20,7 @@ var expectedRows = [ // test/mysql.js :: insertSampleData()
 
 var filterPollQueries = function(queries){
  return _.filter(queries, function(query){
-   return !query.match(/select `key`, `last_update` from `/i);
+   return !query.match(/select `key`, `update` from `/i);
   });
 };
 
@@ -71,7 +72,7 @@ function(test, done){
       test.equal(expectResult(players, newExpected), true, 'Row inserted');
       Meteor.call('delPlayer', newPlayer);
       Meteor.call('getQueries', function(error, endQueries){
-        var newQueries = 
+        var newQueries =
           filterPollQueries(endQueries.slice(startQueriesLength));
         test.equal(expectResult(newQueries, [
           /^insert into `players`/i,
@@ -158,11 +159,42 @@ testAsyncMulti(SUITE_PREFIX + 'Event Listeners', [
   function(test, expect){
     var buffer = 0;
     players.addEventListener('test.cow', function(){ buffer++; });
-    players.addEventListener('test.horse', function(){ buffer++; return false; });
+    players.addEventListener('test.horse', function(){ return false; });
     players.dispatchEvent('test');
-    test.equal(buffer, 1, 'Call multiple listeners with halt');
+    test.equal(buffer, 0, 'Call multiple listeners with halt');
     players.removeEventListener('test');
     players.dispatchEvent('test');
-    test.equal(buffer, 1, 'Remove multiple listeners');
+    test.equal(buffer, 0, 'Remove multiple listeners');
   }
 ]);
+
+Tinytest.addAsync(SUITE_PREFIX + 'Simulated Load', function(test, done){
+  var newPlayers = [];
+  var playersStartLength = players.length;
+  for(var i = 0; i < LOAD_COUNT; i++){
+    newPlayers.push({
+      name: randomString(10),
+      score: Math.floor(Math.random() * 100) * 5
+    });
+  }
+  _.each(newPlayers, function(newPlayer){
+    Meteor.call('insPlayer', newPlayer.name, newPlayer.score);
+//     newPlayer.subscription = new MysqlSubscription('playerScore', newPlayer.name);
+//     newPlayer.subscription.addEventListener('update', function(){
+//       console.log(newPlayer.name, arguments);
+//     });
+  });
+  Meteor.setTimeout(function(){
+    test.equal(players.length, playersStartLength + LOAD_COUNT);
+    _.each(newPlayers, function(newPlayer){
+//       console.log(newPlayer.subscription);
+//       newPlayer.subscription.stop();
+//       test.equal(newPlayer.subscription[0].score, newPlayer.score);
+      Meteor.call('delPlayer', newPlayer.name);
+    });
+    Meteor.setTimeout(function(){
+      test.equal(players.length, playersStartLength);
+      done();
+    }, POLL_WAIT * 2);
+  }, POLL_WAIT);
+});
