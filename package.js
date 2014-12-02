@@ -1,7 +1,7 @@
 Package.describe({
   name: 'numtel:mysql',
   summary: 'MySQL support with Reactive Select Subscriptions',
-  version: '0.0.5',
+  version: '0.0.6',
   git: 'https://github.com/numtel/meteor-mysql.git'
 });
 

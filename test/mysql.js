@@ -2,7 +2,7 @@
 // MIT License, ben@latenightsketches.com
 // test/mysql.js
 
-var SUITE_PREFIX = 'numtel:mysql - ';
+var SUITE_PREFIX = 'numtel:mysql - mysql module - ';
 var POLL_INTERVAL = 1000;
 var db;
 

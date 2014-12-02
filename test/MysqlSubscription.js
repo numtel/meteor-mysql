@@ -2,7 +2,8 @@
 // MIT License, ben@latenightsketches.com
 // test/MysqlSubscription.js
 
-// TODO simulate many connections
+// TODO create html template to test reactivity to DOM
+// TODO what's the deal with MysqlSubcription.stop()?
 
 var SUITE_PREFIX = 'numtel:mysql - MysqlSubscription - ';
 var POLL_WAIT = 1000 + 200; // test/mysql.js :: POLL_INTERVAL + allowance
@@ -74,11 +75,15 @@ function(test, done){
       Meteor.call('getQueries', function(error, endQueries){
         var newQueries =
           filterPollQueries(endQueries.slice(startQueriesLength));
-        test.equal(expectResult(newQueries, [
+        var newQueriesResult = expectResult(newQueries, [
           /^insert into `players`/i,
           /^select \* from players/i,
           /^delete from `players`/i
-        ]), true, 'Only running correct queries');
+        ]);
+        if(newQueriesResult !== true){
+          console.log(newQueries);
+        }
+        test.equal(newQueriesResult, true, 'Only running correct queries');
         Meteor.setTimeout(function(){
           players.removeEventListener(/test1/);
           test.equal(expectResult(eventRecords, [
@@ -108,7 +113,11 @@ function(test, done){
         Meteor.call('getQueries', function(error, endQueries){
           var newQueries =
             filterPollQueries(endQueries.slice(startQueriesLength));
-          test.equal(_.unique(newQueries).length, newQueries.length,
+          var uniqueLength = _.unique(newQueries).length;
+          if(uniqueLength !== newQueries.length){
+            console.log(newQueries);
+          }
+          test.equal(uniqueLength, newQueries.length,
             'Ensure no duplicated queries');
           test.equal(myScore[0].score, 30);
           Meteor.call('setScore', myScore[0].id, 60);
@@ -168,7 +177,43 @@ testAsyncMulti(SUITE_PREFIX + 'Event Listeners', [
   }
 ]);
 
-Tinytest.addAsync(SUITE_PREFIX + 'Simulated Load', function(test, done){
+Tinytest.addAsync(SUITE_PREFIX + 'Multiple Connections', function(test, done){
+  var newPlayers = [];
+  var playersStartLength = players.length;
+  var checkDone = function(){
+    if(_.filter(newPlayers, function(player){
+      return player.done;
+    }).length !== LOAD_COUNT) return;
+    _.each(newPlayers, function(newPlayer){
+      Meteor.call('delPlayer', newPlayer.name);
+    });
+    Meteor.setTimeout(function(){
+      test.equal(players.length, playersStartLength);
+      done();
+    }, POLL_WAIT * 2);
+  };
+
+  for(var i = 0; i < LOAD_COUNT; i++){
+    newPlayers.push({
+      name: randomString(10),
+      score: Math.floor(Math.random() * 100) * 5
+    });
+  }
+
+  _.each(newPlayers, function(newPlayer){
+    Meteor.call('insPlayer', newPlayer.name, newPlayer.score);
+    newPlayer.subscription =
+      new MysqlSubscription('playerScore', newPlayer.name);
+    newPlayer.subscription.addEventListener('update', function(){
+      newPlayer.subscription.removeEventListener('update');
+      newPlayer.done = true;
+      checkDone();
+    });
+  });
+});
+
+Tinytest.addAsync(SUITE_PREFIX + 'Multiple Transactions per Second',
+function(test, done){
   var newPlayers = [];
   var playersStartLength = players.length;
   for(var i = 0; i < LOAD_COUNT; i++){
@@ -179,22 +224,15 @@ Tinytest.addAsync(SUITE_PREFIX + 'Simulated Load', function(test, done){
   }
   _.each(newPlayers, function(newPlayer){
     Meteor.call('insPlayer', newPlayer.name, newPlayer.score);
-//     newPlayer.subscription = new MysqlSubscription('playerScore', newPlayer.name);
-//     newPlayer.subscription.addEventListener('update', function(){
-//       console.log(newPlayer.name, arguments);
-//     });
   });
   Meteor.setTimeout(function(){
     test.equal(players.length, playersStartLength + LOAD_COUNT);
     _.each(newPlayers, function(newPlayer){
-//       console.log(newPlayer.subscription);
-//       newPlayer.subscription.stop();
-//       test.equal(newPlayer.subscription[0].score, newPlayer.score);
       Meteor.call('delPlayer', newPlayer.name);
     });
     Meteor.setTimeout(function(){
       test.equal(players.length, playersStartLength);
       done();
-    }, POLL_WAIT * 2);
+    }, POLL_WAIT);
   }, POLL_WAIT);
 });
