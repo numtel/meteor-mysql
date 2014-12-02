@@ -222,17 +222,29 @@ function(test, done){
       score: Math.floor(Math.random() * 100) * 5
     });
   }
+
+  var checkDone = function(){
+    if(players.length === playersStartLength){
+      test.equal(expectResult(players, expectedRows), true);
+      players.removeEventListener('removed');
+      done();
+    }
+  };
+
+  players.addEventListener('added', function(){
+    if(players.length === playersStartLength + LOAD_COUNT){
+      Meteor.setTimeout(function(){
+        players.removeEventListener('added');
+        players.addEventListener('removed', checkDone);
+        _.each(newPlayers, function(newPlayer){
+          Meteor.call('delPlayer', newPlayer.name);
+        });
+      }, POLL_WAIT);
+
+    }
+  });
+
   _.each(newPlayers, function(newPlayer){
     Meteor.call('insPlayer', newPlayer.name, newPlayer.score);
   });
-  Meteor.setTimeout(function(){
-    test.equal(players.length, playersStartLength + LOAD_COUNT);
-    _.each(newPlayers, function(newPlayer){
-      Meteor.call('delPlayer', newPlayer.name);
-    });
-    Meteor.setTimeout(function(){
-      test.equal(players.length, playersStartLength);
-      done();
-    }, POLL_WAIT);
-  }, POLL_WAIT);
 });

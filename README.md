@@ -31,9 +31,11 @@ var result = db.queryEx(function(esc, escId){
 * The first argument, `esc` is a function that escapes values in the query.
 * The second argument, `escId` is a function that escapes identifiers in the query.
 
-### `connection.initUpdateTable(tableName)`
+### `connection.initUpdateTable(tableName, [updateVar])`
 
 Specify a table (as string) to use for storing the keys used for notifying updates to queries. The table will be created if it does not exist. To install for the first time, specify a table name that does not currently exist.
+
+Optionally, pass the name of a variable to use for the update counter variable. If unspecified, this value defaults to `meteor_update_count`.
 
 This method must be called before any calls to `connection.select()`.
 
