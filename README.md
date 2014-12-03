@@ -58,7 +58,7 @@ Name | Type | Required | Description
 
 * When a function is allowed in place of a string, use the `queryEx()` argument structure to escape values and identifiers.
 
-* Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 1000 ms. An interval too short may introduce erratic updates.
+* Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 200 ms.
 
 ## Client/Server Implements
 

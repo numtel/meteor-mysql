@@ -3,7 +3,7 @@
 // test/MysqlSubscription.js
 
 var SUITE_PREFIX = 'numtel:mysql - MysqlSubscription - ';
-var POLL_WAIT = 1000 + 200; // test/mysql.js :: POLL_INTERVAL + allowance
+var POLL_WAIT = 200 + 400; // test/mysql.js :: POLL_INTERVAL + allowance
 var LOAD_COUNT = 10;
 
 players = new MysqlSubscription('allPlayers');

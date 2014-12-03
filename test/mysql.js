@@ -3,7 +3,7 @@
 // test/mysql.js
 
 var SUITE_PREFIX = 'numtel:mysql - mysql module - ';
-var POLL_INTERVAL = 1000;
+var POLL_INTERVAL = 200;
 var db;
 
 Meteor.startup(function(){
