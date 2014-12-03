@@ -32,6 +32,7 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
   api.use([
     'tinytest',
+    'templating',
     'underscore',
     'numtel:mysql'
   ]);
@@ -40,6 +41,10 @@ Package.onTest(function(api) {
     'test/helper.expectResult.js',
     'test/helper.randomString.js'
   ]);
+  api.addFiles([
+    'test/mock.template.html',
+    'test/mock.template.js'
+  ], 'client');
   api.addFiles([
     'test/mock.connection.query.js',
     'test/mysql.js'

@@ -2,9 +2,6 @@
 // MIT License, ben@latenightsketches.com
 // test/MysqlSubscription.js
 
-// TODO create html template to test reactivity to DOM
-// TODO what's the deal with MysqlSubcription.stop()?
-
 var SUITE_PREFIX = 'numtel:mysql - MysqlSubscription - ';
 var POLL_WAIT = 1000 + 200; // test/mysql.js :: POLL_INTERVAL + allowance
 var LOAD_COUNT = 10;
@@ -104,6 +101,11 @@ function(test, done){
   Meteor.setTimeout(function(){
     test.equal(myScore.length, 1);
     test.equal(myScore[0].score, 60);
+    if(Meteor.isClient){
+      var testEl = document.getElementById('myScoreTest');
+      var testElVal = parseInt($.trim(testEl.textContent), 10);
+      test.equal(testElVal, 60, 'Reactive template');
+    }
     Meteor.call('getQueries', function(error, startQueries){
       // NOTE: On server, the result argument of the Meteor method call is
       //       passed by reference, i.e. startQueries===endQueries
@@ -120,6 +122,10 @@ function(test, done){
           test.equal(uniqueLength, newQueries.length,
             'Ensure no duplicated queries');
           test.equal(myScore[0].score, 30);
+          if(Meteor.isClient){
+            testElVal = parseInt($.trim(testEl.textContent), 10);
+            test.equal(testElVal, 30, 'Reactive template');
+          }
           Meteor.call('setScore', myScore[0].id, 60);
           done();
         });
