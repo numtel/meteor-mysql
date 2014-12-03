@@ -18,7 +18,8 @@ Meteor.startup(function(){
   db.queryEx(function(esc, escId){
     return 'drop function if exists ' + escId(updateTable + '_next');
   });
-  db.initUpdateTable(updateTable);
+//   db.initUpdateTable(updateTable);
+  db.initUpdateServer();
 
   Meteor.publish('allPlayers', function(){
     db.select(this, {
@@ -102,6 +103,7 @@ Tinytest.add(SUITE_PREFIX + 'queryEx with function', function(test){
 
 Tinytest.add(SUITE_PREFIX + 'initUpdateTable', function(test){
   var table = db._updateTable;
+  if(!table) return;
 
   test.equal(expectResult(db.queryEx(function(esc, escId){
     return 'show columns from ' + escId(table);

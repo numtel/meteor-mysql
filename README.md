@@ -35,11 +35,30 @@ var result = db.queryEx(function(esc, escId){
 
 Specify a table (as string) to use for storing the keys used for notifying updates to queries. The table will be created if it does not exist. To install for the first time, specify a table name that does not currently exist.
 
-This method must be called before any calls to `connection.select()`.
+### `connection.initUpdateServer([port], [hostName])`
+
+*Under construction*
+
+Instead of polling a table for updates, broadcast updates from MySQL directly to your Meteor server. If you can't wait for an installation script and more testing, you can try it using the following commands.
+
+```bash
+# Install dependency (on Ubuntu):
+$ sudo apt-get install libmysqlclient-dev
+
+# Compile:
+$ gcc $(mysql_config --cflags) -shared -fPIC -o meteor_update.so lib/meteor_update.c
+
+# Install:
+$ sudo cp meteor_update.so $(mysql_config --plugindir)
+```
+
+Due to the early stage of development, the default settings must be used: port 9801 on localhost.
 
 ### `connection.select(subscription, options)`
 
 Bind a SQL select statement to a subscription object (e.g. context of a `Meteor.publish()` function).
+
+`initUpdateTable()` or `initUpdateServer()` must be called before publishing a select statement.
 
 Option | Type | Required | Description
 ------|-------|-----------|--------------
