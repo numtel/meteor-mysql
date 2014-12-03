@@ -173,13 +173,13 @@ testAsyncMulti(SUITE_PREFIX + 'Event Listeners', [
   },
   function(test, expect){
     var buffer = 0;
-    players.addEventListener('test.cow', function(){ buffer++; });
-    players.addEventListener('test.horse', function(){ return false; });
+    players.addEventListener('test.a', function(){ buffer++; });
+    players.addEventListener('test.b', function(){ buffer++; return false; });
     players.dispatchEvent('test');
-    test.equal(buffer, 0, 'Call multiple listeners with halt');
+    test.equal(buffer, 1, 'Call multiple listeners with halt');
     players.removeEventListener('test');
     players.dispatchEvent('test');
-    test.equal(buffer, 0, 'Remove multiple listeners');
+    test.equal(buffer, 1, 'Remove multiple listeners');
   }
 ]);
 
