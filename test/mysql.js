@@ -18,8 +18,8 @@ Meteor.startup(function(){
   db.queryEx(function(esc, escId){
     return 'drop function if exists ' + escId(updateTable + '_next');
   });
-//   db.initUpdateTable(updateTable);
-  db.initUpdateServer();
+  db.initUpdateTable(updateTable);
+//   db.initUpdateServer();
 
   Meteor.publish('allPlayers', function(){
     db.select(this, {

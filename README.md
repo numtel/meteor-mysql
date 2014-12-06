@@ -37,7 +37,7 @@ Specify a table (as string) to use for storing the keys used for notifying updat
 
 ### `connection.initUpdateServer([port], [hostName])`
 
-*Under construction*
+***Under construction***
 
 Instead of polling a table for updates, broadcast updates from MySQL directly to your Meteor server. If you can't wait for an installation script and more testing, you can try it using the following commands.
 
@@ -116,6 +116,7 @@ Name | Listener Arguments | Description
 `added` | `index, newRow` | Row inserted, after update
 `changed` | `index, oldRow, newRow` | Row updated, after update
 `removed` | `index, oldRow` | Row removed, after update
+`reset` | `msg` | Subscription reset (most likely due to code-push), before update
 
 ## Running Tests
 
