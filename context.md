@@ -53,6 +53,8 @@ By using Statement-Based replication, the binary log can be tailed. This process
 
 In the script, each time the log changes, the `mysqlbinlog` interpretation program must be initialized. Trying to parse the results of the log file without the `mysqlbinlog` program could result in quicker operation but it would be very difficult to extract the necessary information to determine which database an operation targeted.
 
+There is also [this script](https://gist.github.com/laverdet/958588), [this NPM module](https://github.com/nevill/zongji), and [this NPM module](https://github.com/HupuInc/node-mysql-listener) that I still need to study.
+
 ## Postgres Sequel
 
 Postgres allows functions accessing external resources to be written using `plperlu` scripts (only as a super user). More research is required to determine whether this a path to a reactive Postgres integration without polling a table.
