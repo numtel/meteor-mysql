@@ -11,14 +11,21 @@
   <label>
     Number to insert:
     <input type="number" value="100" step="100" min="1" max="100000" id="insCount">
-  </label>
-  <button id="insert">Insert Rows</button>
-  <button id="clear">Clear Table</button>
-  <p>The result set contains {{counter}} rows.</p>
+  </label><br>
+  <button id="insertRowsPoll">Insert Rows (Poll)</button>
+  <button id="clearTablePoll">Clear Table (Poll)</button><br>
+  <button id="insertRowsUdf">Insert Rows (Udf)</button>
+  <button id="clearTableUdf">Clear Table (Udf)</button><br>
+  <button id="insertDocs">Insert Documents</button>
+  <button id="insertDocsDirect">Insert Documents using Mongo-Direct</button>
+  <button id="clearCollection">Clear Collection</button>
+  <p>The Poll result set contains {{counterPoll}} rows.</p>
+  <p>The UDF result set contains {{counterUdf}} rows.</p>
+  <p>The Mongo collection contains {{collectionCounter}} documents.</p>
   <ul class="results">
     {{#each results}}
       <li>
-        <h2>Result #{{ index }}</h2>
+        <h2>{{ type }} Result #{{ index }}</h2>
         <dl>
           <dt>Duration</dt>
           <dd>{{ time }} ms</dd>

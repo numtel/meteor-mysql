@@ -1,4 +1,13 @@
-players = new MysqlSubscription('players');
+playersPoll = new MysqlSubscription('playersPoll');
+playersUdf = new MysqlSubscription('playersUdf');
+
+/*
+TODO: generalize the method descriptions, enable multiple trials per test
+{
+  run: function(count, done){},
+  reset: function() {}
+}
+*/
 
 Session.setDefault("results", []);
 
@@ -14,8 +23,14 @@ var toggleButtons = function(enabled){
 };
 
 Template.hello.helpers({
-  counter: function () {
-    return players.reactive().length;
+  counterPoll: function () {
+    return playersPoll.reactive().length;
+  },
+  counterUdf: function () {
+    return playersUdf.reactive().length;
+  },
+  collectionCounter: function () {
+    return MongoPlayers.find().count();
   },
   results: function () {
     return Session.get('results');
@@ -23,18 +38,19 @@ Template.hello.helpers({
 });
 
 Template.hello.events({
-  'click #insert': function (event, template) {
+  'click #insertRowsPoll': function (event, template) {
     toggleButtons(false);
     var startTime = Date.now();
     var methodTime;
-    var startCount = players.length;
+    var startCount = playersPoll.length;
     var insCount = parseInt(template.$('#insCount')[0].value, 10);
     var results, result;
-    players.addEventListener('added.insertRows', function(){
-      if(players.length === startCount + insCount){
-        players.removeEventListener(/insertRows/);
+    playersPoll.addEventListener('added.insertRows', function(){
+      if(playersPoll.length === startCount + insCount){
+        playersPoll.removeEventListener(/insertRows/);
         results = Session.get('results');
         result = {
+          type: 'MySQL (Poll)',
           index: results.length + 1,
           time: Date.now() - startTime,
           serverTime: methodTime,
@@ -47,19 +63,138 @@ Template.hello.events({
         toggleButtons(true);
       }
     });
-    Meteor.call('insRows', insCount, function(){
+    Meteor.call('insRowsPoll', insCount, function(){
       methodTime = Date.now() - startTime;
     });
   },
-  'click #clear': function(event){
+  'click #clearTablePoll': function(event){
+    if(playersPoll.length === 0) return;
     toggleButtons(false);
-    Meteor.call('resetTable');
-    players.addEventListener('removed.resetTable', function(){
-      if(players.length === 0){
+    Meteor.call('resetTablePoll');
+    playersPoll.addEventListener('removed.resetTable', function(){
+      if(playersPoll.length === 0){
         toggleButtons(true);
-        players.removeEventListener(/resetTable/);
+        playersPoll.removeEventListener(/resetTable/);
       }
     });
+  },
+  'click #insertRowsUdf': function (event, template) {
+    toggleButtons(false);
+    var startTime = Date.now();
+    var methodTime;
+    var startCount = playersUdf.length;
+    var insCount = parseInt(template.$('#insCount')[0].value, 10);
+    var results, result;
+    playersUdf.addEventListener('added.insertRows', function(){
+      if(playersUdf.length === startCount + insCount){
+        playersUdf.removeEventListener(/insertRows/);
+        results = Session.get('results');
+        result = {
+          type: 'MySQL (UDF)',
+          index: results.length + 1,
+          time: Date.now() - startTime,
+          serverTime: methodTime,
+          count: insCount,
+        };
+        result.rate = result.count / (result.time / 1000);
+        result.rate = Math.floor(result.rate * 100) / 100;
+        results.unshift(result);
+        Session.set('results', results);
+        toggleButtons(true);
+      }
+    });
+    Meteor.call('insRowsUdf', insCount, function(){
+      methodTime = Date.now() - startTime;
+    });
+  },
+  'click #clearTableUdf': function(event){
+    if(playersUdf.length === 0) return;
+    toggleButtons(false);
+    Meteor.call('resetTableUdf');
+    playersUdf.addEventListener('removed.resetTable', function(){
+      if(playersUdf.length === 0){
+        toggleButtons(true);
+        playersUdf.removeEventListener(/resetTable/);
+      }
+    });
+  },
+  'click #insertDocs': function (event, template) {
+    toggleButtons(false);
+    var startTime = Date.now();
+    var methodTime;
+    var insCount = parseInt(template.$('#insCount')[0].value, 10);
+    var results, result;
+    var cursor = MongoPlayers.find();
+    var startCount = cursor.count();
+    var observer = cursor.observe({
+      added: function(){
+        if(cursor.count() === startCount + insCount){
+          observer.stop();
+          results = Session.get('results');
+          result = {
+            type: 'Mongo',
+            index: results.length + 1,
+            time: Date.now() - startTime,
+            serverTime: methodTime,
+            count: insCount,
+          };
+          result.rate = result.count / (result.time / 1000);
+          result.rate = Math.floor(result.rate * 100) / 100;
+          results.unshift(result);
+          Session.set('results', results);
+          toggleButtons(true);
+        }
+      }
+    });
+    Meteor.call('insDocs', insCount, function(){
+      methodTime = Date.now() - startTime;
+    });
+  },
+  'click #insertDocsDirect': function (event, template) {
+    toggleButtons(false);
+    var startTime = Date.now();
+    var methodTime;
+    var insCount = parseInt(template.$('#insCount')[0].value, 10);
+    var results, result;
+    var cursor = MongoPlayers.find();
+    var startCount = cursor.count();
+    var observer = cursor.observe({
+      added: function(){
+        if(cursor.count() === startCount + insCount){
+          observer.stop();
+          results = Session.get('results');
+          result = {
+            type: 'Mongo Direct',
+            index: results.length + 1,
+            time: Date.now() - startTime,
+            serverTime: methodTime,
+            count: insCount,
+          };
+          result.rate = result.count / (result.time / 1000);
+          result.rate = Math.floor(result.rate * 100) / 100;
+          results.unshift(result);
+          Session.set('results', results);
+          toggleButtons(true);
+        }
+      }
+    });
+    Meteor.call('insDocsDirect', insCount, function(){
+      methodTime = Date.now() - startTime;
+    });
+  },
+  'click #clearCollection': function(event){
+    var cursor = MongoPlayers.find();
+    if(cursor.count() === 0) return;
+    toggleButtons(false);
+    var observer = cursor.observe({
+      removed: function(){
+        if(cursor.count() === 0){
+          toggleButtons(true);
+          observer.stop();
+        }
+      }
+    });
+    Meteor.call('resetCollection');
   }
 });
 

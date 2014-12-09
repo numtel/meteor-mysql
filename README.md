@@ -42,22 +42,22 @@ Specify a table (as string) to use for storing the keys used for notifying updat
 Instead of polling a table for updates, broadcast updates from MySQL directly to your Meteor server. If you can't wait for an installation script and more testing, you can try it using the following commands.
 
 ```bash
-# Install dependency on CentOS:
+# Install dependency on CentOS
 $ yum install mysql-devel
 
-# Install dependency on openSUSE:
+# Install dependency on openSUSE
 $ zypper install libmysqlclient-devel
 
-# Install dependency on Debian/Ubuntu:
+# Install dependency on Debian/Ubuntu
 $ sudo apt-get install libmysqlclient-dev
 
-# Install dependency on Mac OS X (Does this work??):
+# Install dependency on Mac OS X (Does this work??)
 $ brew install mysql-connector-c
 
-# Compile:
+# Compile
 $ gcc $(mysql_config --cflags) -shared -fPIC -o meteor_update.so lib/meteor_update.c
 
-# Install:
+# Install
 $ sudo cp meteor_update.so $(mysql_config --plugindir)
 ```
 
@@ -148,7 +148,7 @@ $ ed test/settings.local.json
 # Run test server
 $ meteor test-packages --settings test/settings.local.json ./
 
-# Performance test application can also be run:
+# Performance test application can also be run
 $ cd test/performance
 $ meteor --settings ../settings.local.json
 ```

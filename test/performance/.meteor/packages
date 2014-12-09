@@ -7,4 +7,7 @@ meteor-platform
 numtel:mysql
 d3js:d3
 clinical:nvd3
+insecure
+autopublish
+thinksoftware:mongo-direct
 
