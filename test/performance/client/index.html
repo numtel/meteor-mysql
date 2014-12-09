@@ -1,0 +1,36 @@
+<head>
+  <title>performance</title>
+</head>
+
+<body>
+  {{> hello}}
+</body>
+
+<template name="hello">
+  <h1>numtel:mysql Performance Testing</h1>
+  <label>
+    Number to insert:
+    <input type="number" value="100" step="100" min="1" max="100000" id="insCount">
+  </label>
+  <button id="insert">Insert Rows</button>
+  <button id="clear">Clear Table</button>
+  <p>The result set contains {{counter}} rows.</p>
+  <ul class="results">
+    {{#each results}}
+      <li>
+        <h2>Result #{{ index }}</h2>
+        <dl>
+          <dt>Duration</dt>
+          <dd>{{ time }} ms</dd>
+          <dt>Server Duration</dt>
+          <dd>{{ serverTime }} ms</dd>
+          <dt># Rows Inserted</dt>
+          <dd>{{ count }}</dd>
+          <dt>Inserts/Second</dt>
+          <dd>{{ rate }}</dd>
+        </dl>
+      </li>
+    {{/each}}
+  </ul>
+  <div id="graph"></div>
+</template>

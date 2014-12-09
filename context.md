@@ -17,7 +17,7 @@ Binary Log | <ul><li>Most similar to Oplog<li>Least intrusive on schema</ul> | <
 
 ### UDF TCP callback
 
-To realize OPLOG-esque integration with MySQL, a UDF written in C/C++ must be compiled and installed on the machine running MySQL server. `sudo` or `root` access is required to install the UDF in MySQL's plugin directory.
+To realize OPLOG-esque integration with MySQL, a UDF written in C/C++ may be compiled and installed on the machine running MySQL server. `sudo` or `root` access is required to install the UDF in MySQL's plugin directory.
 
 Keeping the same package interface, a UDF backed update transmission option would offer lower latency and greater reliability.
 
@@ -25,12 +25,12 @@ Trigger action bodies could change from conditionals that operate on an update p
 
 ```sql
 IF NEW.name = 'Maxwell' THEN
-  SET @`test_updates_count` = (
-    SELECT `update` FROM `test_updates`
-    ORDER BY `update` DESC LIMIT 1);
-  UPDATE `test_updates`
-    SET `update`= @`test_updates_count` + 1
-    WHERE `key` = 3303291040;
+  UPDATE `perf_updates` as p
+    JOIN (
+      SELECT p1.`update` FROM `perf_updates` as p1
+      ORDER BY p1.`update` DESC LIMIT 1) as g
+    SET p.`update`= g.`update` + 1
+    WHERE `key` = 2103814563;
 END IF;
 ```
 
@@ -40,6 +40,8 @@ IF NEW.name = 'Maxwell' THEN
   DO meteor_update(3303291040);
 END IF;
 ```
+
+See the [main readme about `initUpdateServer()`](https://github.com/numtel/meteor-mysql#connectioninitupdateserverport-hostname)...
 
 ### `FILE` privilege
 

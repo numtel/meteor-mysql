@@ -51,6 +51,9 @@ $ zypper install libmysqlclient-devel
 # Install dependency on Debian/Ubuntu:
 $ sudo apt-get install libmysqlclient-dev
 
+# Install dependency on Mac OS X (Does this work??):
+$ brew install mysql-connector-c
+
 # Compile:
 $ gcc $(mysql_config --cflags) -shared -fPIC -o meteor_update.so lib/meteor_update.c
 
@@ -84,6 +87,8 @@ Name | Type | Required | Description
 * When a function is allowed in place of a string, use the `queryEx()` argument structure to escape values and identifiers.
 
 * Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 200 ms.
+
+* MySQL command `truncate` does not use `delete` so the trigger will not be called and subscriptions will not be updated. Use slower `delete` without a `where` clause to perform same operation while using subscriptions.
 
 ## Client/Server Implements
 
@@ -142,6 +147,10 @@ $ ed test/settings.local.json
 
 # Run test server
 $ meteor test-packages --settings test/settings.local.json ./
+
+# Performance test application can also be run:
+$ cd test/performance
+$ meteor --settings ../settings.local.json
 ```
 
 ## License
