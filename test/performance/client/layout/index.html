@@ -1,0 +1,26 @@
+<head>
+  <title>performance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+  {{> progress }}
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        {{> startTestForm }}
+      </div>
+    </div>
+  </nav>
+  <div class="container-fluid">
+    {{> graph }}
+  </div>
+</body>
+
+<template name="progress">
+  <div id="progress" style="width: {{ width }}%"></div>
+</template>
+
+<template name="graph">
+  <div id="graph"><svg></svg></div>
+</template>
