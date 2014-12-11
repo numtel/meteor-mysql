@@ -10,10 +10,16 @@ Multiple paths for notification of updates are available:
 
 Transmission method | Pros | Cons
 --------------------|------|-------
-Poll Table | <ul><li>Super easy setup</ul> | <ul><li>Requires potentially slow recurring select poll<br>*Should be able to write a speed test...*</ul>
-UDF TCP Callback | <ul><li>Potentially high performance</ul> | <ul><li>Complicated setup<li>Requires `ROOT` access<li>Requires installing MySQL development packages</ul>
+Poll Table | <ul><li>Super easy setup</ul> | <ul><li>Requires potentially slow recurring select poll</ul>
+UDF TCP Callback | <ul><li>No polling required</ul> | <ul><li>Complicated setup<li>Requires `ROOT` access<li>Requires installing MySQL development packages</ul>
 `FILE` privilege export | <ul><li>Simple operation</ul> | <ul><li>Potentially insecure<li>Support blocked on some hosting</ul>
 Binary Log | <ul><li>Most similar to Oplog<li>Least intrusive on schema</ul> | <ul><li>MySQL server must be configured to output binary log</ul>
+
+Benchmark comparing 2 repetitions of poll table, UDF callback, Mongo using Meteor interface, and Mongo using [`thinksoftware:mongo-direct` package](https://github.com/thinksoftware/meteor-mongo-direct/):
+
+![Benchmark graph output](benchmark-141211.png)
+
+Slower performance with UDF callback may be due to the fact that every row changed triggers a TCP callback while with the polling table, each row change results in only an update to a memory table value.
 
 ### UDF TCP callback
 
