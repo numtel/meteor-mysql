@@ -8,7 +8,7 @@ var db;
 
 Meteor.startup(function(){
   db = mysql.createConnection(Meteor.settings.mysql);
-  db.connect();
+  //db.connect(); // Apparently this happens automatically?
   insertSampleData();
 
   var updateTable = 'test_updates';

@@ -129,7 +129,7 @@ Name | Listener Arguments | Description
 `removed` | `index, oldRow` | Row removed, after update
 `reset` | `msg` | Subscription reset (most likely due to code-push), before update
 
-## Running Tests
+## Tests / Benchmarks
 
 A MySQL server is required to run the test suite.
 
@@ -145,12 +145,9 @@ $ cd meteor-mysql
 # (an empty database is suggested)
 $ ed test/settings.local.json
 
-# Run test server
+# Run test/benchmark server
 $ meteor test-packages --settings test/settings.local.json ./
 
-# Performance test application can also be run
-$ cd test/performance
-$ meteor --settings ../settings.local.json
 ```
 
 ## License

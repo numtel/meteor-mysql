@@ -1,3 +1,5 @@
+if(!Meteor.settings.udf) return;
+
 var dbUdf;
 
 var TABLE_PREFIX = 'perf_udf_';

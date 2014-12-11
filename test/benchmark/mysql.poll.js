@@ -46,3 +46,4 @@ Meteor.publish('playersPoll', function(){
     triggers: [ { table: TABLE_PREFIX + 'players' } ]
   });
 });
+

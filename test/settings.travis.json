@@ -4,5 +4,6 @@
     "user": "root",
     "password": "",
     "database": "myapp_test"
-  }
+  },
+  "udf": false
 }

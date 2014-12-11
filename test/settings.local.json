@@ -4,5 +4,6 @@
     "user": "root",
     "password": "numtel",
     "database": "test_package"
-  }
+  },
+  "udf": true
 }

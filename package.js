@@ -1,7 +1,7 @@
 Package.describe({
   name: 'numtel:mysql',
   summary: 'MySQL support with Reactive Select Subscriptions',
-  version: '0.0.12',
+  version: '0.0.13',
   git: 'https://github.com/numtel/meteor-mysql.git'
 });
 
@@ -34,6 +34,11 @@ Package.onTest(function(api) {
     'tinytest',
     'templating',
     'underscore',
+    'mongo',
+    'autopublish',
+    'insecure',
+    'numtel:benchmark-packages@0.0.1',
+    'thinksoftware:mongo-direct@1.0.2',
     'numtel:mysql'
   ]);
   api.use('test-helpers'); // Did not work concatenated above
@@ -52,4 +57,16 @@ Package.onTest(function(api) {
   api.addFiles([
     'test/MysqlSubscription.js'
   ]);
+
+  // Benchmark helpers
+  api.addFiles([
+    'test/benchmark/MongoPlayers.js',
+    'test/benchmark/mysql.poll.js',
+    'test/benchmark/mysql.udf.js'
+  ], 'server');
+
+  // Benchmarks
+  api.addFiles([
+    'test/benchmark/insertMany.js'
+  ], 'client');
 });
