@@ -1,7 +1,7 @@
 Package.describe({
   name: 'numtel:mysql',
   summary: 'MySQL support with Reactive Select Subscriptions',
-  version: '0.0.13',
+  version: '0.0.14',
   git: 'https://github.com/numtel/meteor-mysql.git'
 });
 
@@ -69,4 +69,7 @@ Package.onTest(function(api) {
   api.addFiles([
     'test/benchmark/insertMany.js'
   ], 'client');
+  api.addFiles([
+    'test/benchmark/maxVsOrderBy.js'
+  ]);
 });

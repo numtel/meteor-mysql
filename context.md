@@ -51,17 +51,22 @@ See the [main readme about `initUpdateServer()`](https://github.com/numtel/meteo
 
 ### `FILE` privilege
 
-MySQL supports a `FILE` privelege on users that allows data to be read and written to the filesystem. The use of this privelege presents a security risk and is not supported by many hosting providers.
+MySQL supports a `FILE` privilege on users that allows data to be read and written to the filesystem. The use of this privilege presents a security risk and is not supported by many hosting providers.
 
 ### Binary log
 
 Obtain direct log of changes to database.
 
-By using Statement-Based replication, the binary log can be tailed. This process is slow though. Using [this script to tail mysqlbinlog](https://gist.github.com/petethomas/1572119), it takes ~2 seconds for a statement to be processed with a very simple database on my computer.
+By using Statement-Based replication, the binary log can be tailed. This process is slow though: a file (that can grow to be many gigabytes) must be watched for new statements or rows. Found solutions for MySQL binlog tailing in Javascript utilize the `watchFile()` method of the `fs` module, polling for changes to the [statistics of the] file.
 
-In the script, each time the log changes, the `mysqlbinlog` interpretation program must be initialized. Trying to parse the results of the log file without the `mysqlbinlog` program could result in quicker operation but it would be very difficult to extract the necessary information to determine which database an operation targeted.
+* [Script that uses `mysqlbinlog`](https://gist.github.com/petethomas/1572119) - Very basic. Works but requires a lot more to provide necessary features
+* [Another script](https://gist.github.com/laverdet/958588) - Does not work in my tests, but the code is interesting
+* [ZongJi NPM module](https://github.com/nevill/zongji) - Unclear how this works, example does not work for me
+* [Hupu NPM module](https://github.com/HupuInc/node-mysql-listener) - Not tested but requires C++ compilation so not a good option as `sudo` or `root` would be required for installation along with the MySQL development package.
 
-There is also [this script](https://gist.github.com/laverdet/958588), [this NPM module](https://github.com/nevill/zongji), and [this NPM module](https://github.com/HupuInc/node-mysql-listener) that I still need to study.
+The main advantage to using the Binlog would be to enable updates without modifying the underlying database with triggers. Theoretically, realizing Binlog updates appears as an ultimate solution to Meteor-MySQL integration but benchmarks and real world performance are necessary to tell the full story.
+
+I may attempt a Binlog integration but ironing out issues with multiple Meteor servers on the same database using the poll table (and UDF) take a higher priority. The performance gain over Mongo is already very significant.
 
 ## Postgres Sequel
 
