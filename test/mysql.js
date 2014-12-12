@@ -15,9 +15,6 @@ Meteor.startup(function(){
   db.queryEx(function(esc, escId){
     return 'drop table if exists ' + escId(updateTable);
   });
-  db.queryEx(function(esc, escId){
-    return 'drop function if exists ' + escId(updateTable + '_next');
-  });
   db.initUpdateTable(updateTable);
 //   db.initUpdateServer();
 
@@ -86,6 +83,16 @@ var insertSampleData = function(){
     "INSERT INTO `players` (`name`, `score`) VALUES ",
       "('Kepler', 40),('Leibniz',50),('Maxwell',60),('Planck',70);"
   ].join('\n'));
+  db.queryEx(function(esc, escId){
+    return [
+      'CREATE TRIGGER `players_test`',
+      'AFTER INSERT ON `players`',
+      'FOR EACH ROW',
+      'BEGIN',
+      '/* I will not be removed! */',
+      'END',
+    ].join('\n');
+  });
 };
 
 Tinytest.add(SUITE_PREFIX + 'queryEx with string', function(test){
@@ -120,3 +127,16 @@ Tinytest.add(SUITE_PREFIX + 'initUpdateTable', function(test){
   ]), true, 'Indexes incorrect');
 });
 
+Tinytest.add(SUITE_PREFIX + 'Trigger contents preserved', function(test){
+  var result = db.queryEx(function(esc, escId){
+    return [
+      "SELECT ACTION_STATEMENT AS body",
+      "FROM information_schema.TRIGGERS",
+      "WHERE TRIGGER_SCHEMA = SCHEMA()",
+      "AND TRIGGER_NAME = 'players_test'"
+    ].join('\n');
+  });
+  test.equal(result.length, 1);
+  test.include(result[0].body, '/* BEGIN Meteor Triggers */');
+  test.include(result[0].body, '/* I will not be removed! */');
+});

@@ -1,37 +1,74 @@
-playersPoll = new MysqlSubscription('playersPoll');
-playersUdf = new MysqlSubscription('playersUdf');
-MongoPlayers = new Mongo.Collection('MongoPlayers');
+// numtel:mysql
+// MIT License, ben@latenightsketches.com
+// test/benchmark/insertMany.js
 
-var genMongoTest = function(meteorMethod){
- return function(options, done){
-    var cursor = MongoPlayers.find();
-    var startCount = cursor.count();
-    var observer = cursor.observe({
-      added: function(){
-        if(cursor.count() === startCount + options.count){
-          observer.stop();
+// Benchmark number of inserts published to client per second
+// Compare MySQL poll table, UDF TCP callback, Mongo, and Mongo-Direct
+var genMysqlTest = function(prefix){
+  var subscription = new MysqlSubscription(prefix + 'players');
+  return {
+    run: function(options, done){
+      var startCount = subscription.length;
+      subscription.addEventListener('added.insertRows', function(){
+        var result;
+        if(subscription.length === startCount + options.count){
+          subscription.removeEventListener(/insertRows/);
           done();
         }
-      }
-    });
-    Meteor.call(meteorMethod, options.count, function(){
-      done('server');
-    });
-  };
+      });
+      Meteor.call(prefix + 'insert', options.count, function(error){
+        if(error && error.error === 404){
+          // Server connection (UDF) may not be available
+          subscription.removeEventListener(/insertRows/);
+          done();
+        }
+        done('server');
+      });
+    },
+    reset: function(options, done){
+      if(subscription.length === 0) return done();
+      Meteor.call(prefix + 'reset');
+      subscription.addEventListener('removed.resetTable', function(){
+        if(subscription.length === 0){
+          subscription.removeEventListener(/resetTable/);
+          done();
+        }
+      });
+    }
+  }
 };
 
-var resetMongoCollection = function(options, done){
-  var cursor = MongoPlayers.find();
-  if(cursor.count() === 0) return done();
-  var observer = cursor.observe({
-    removed: function(){
-      if(cursor.count() === 0){
-        observer.stop();
-        done();
-      }
+// Both Mongo tests use same collection
+MongoPlayers = new Mongo.Collection('MongoPlayers');
+var genMongoTest = function(meteorMethod){
+  return {
+    run: function(options, done){
+      var cursor = MongoPlayers.find();
+      var startCount = cursor.count();
+      var observer = cursor.observe({
+        added: function(){
+          if(cursor.count() === startCount + options.count){
+            observer.stop();
+            done();
+          }
+        }
+      });
+      Meteor.call(meteorMethod, options.count, function(){ done('server'); });
+    },
+    reset: function(options, done){
+      var cursor = MongoPlayers.find();
+      if(cursor.count() === 0) return done();
+      var observer = cursor.observe({
+        removed: function(){
+          if(cursor.count() === 0){
+            observer.stop();
+            done();
+          }
+        }
+      });
+      Meteor.call('resetCollection');
     }
-  });
-  Meteor.call('resetCollection');
+  };
 };
 
 Benchmark.addCase({
@@ -40,69 +77,11 @@ Benchmark.addCase({
   _default: {
     count: 1000,
     sampleSize: 1,
+    // Explictly specify methods for easy omission
     methods: ['mysql-poll', 'mysql-udf', 'mongo-standard', 'mongo-direct']
   },
-  'mysql-poll': {
-    run: function(options, done){
-      var startCount = playersPoll.length;
-      playersPoll.addEventListener('added.insertRows', function(){
-        var result;
-        if(playersPoll.length === startCount + options.count){
-          playersPoll.removeEventListener(/insertRows/);
-          done();
-        }
-      });
-      Meteor.call('insRowsPoll', options.count, function(){
-        done('server');
-      });
-    },
-    reset: function(options, done){
-      if(playersPoll.length === 0) return done();
-      Meteor.call('resetTablePoll');
-      playersPoll.addEventListener('removed.resetTable', function(){
-        if(playersPoll.length === 0){
-          playersPoll.removeEventListener(/resetTable/);
-          done();
-        }
-      });
-    }
-  },
-  'mysql-udf': {
-    run: function(options, done){
-      var startCount = playersUdf.length;
-      playersUdf.addEventListener('added.insertRows', function(){
-        var result;
-        if(playersUdf.length === startCount + options.count){
-          playersUdf.removeEventListener(/insertRows/);
-          done();
-        }
-      });
-      Meteor.call('insRowsUdf', options.count, function(error){
-        if(error && error.error === 404){
-          // UDF not available
-          playersUdf.removeEventListener(/insertRows/);
-          done();
-        }
-        done('server');
-      });
-    },
-    reset: function(options, done){
-      if(playersUdf.length === 0) return done();
-      Meteor.call('resetTableUdf');
-      playersUdf.addEventListener('removed.resetTable', function(){
-        if(playersUdf.length === 0){
-          playersUdf.removeEventListener(/resetTable/);
-          done();
-        }
-      });
-    }
-  },
-  'mongo-standard': {
-    run: genMongoTest('insDocs'),
-    reset: resetMongoCollection
-  },
-  'mongo-direct': {
-    run: genMongoTest('insDocsDirect'),
-    reset: resetMongoCollection
-  }
+  'mysql-poll': genMysqlTest('benchmark_poll_'),
+  'mysql-udf': genMysqlTest('benchmark_udf_'),
+  'mongo-standard': genMongoTest('insDocs'),
+  'mongo-direct': genMongoTest('insDocsDirect')
 });

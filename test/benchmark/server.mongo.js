@@ -1,3 +1,8 @@
+// numtel:mysql
+// MIT License, ben@latenightsketches.com
+// test/benchmark/server.mongo.js
+
+// Provide server for Mongo benchmarks
 MongoPlayers = new Mongo.Collection('MongoPlayers');
 
 Meteor.methods({

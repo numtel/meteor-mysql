@@ -1,53 +1,48 @@
+// numtel:mysql
+// MIT License, ben@latenightsketches.com
+// test/benchmark/maxVsOrderBy.js
+
+// Determine performance difference using each MySQL statement:
+// MAX() or ORDER BY DESC LIMIT 1 to get highest value from table
 if(Meteor.isClient){
-  var reset = function(options, done){
-    Meteor.call('resetTableMax', options.rows, function(){
-      done();
-    });
-  };
-  var run = function(useMax){
-    return function(options, done){
-      Meteor.call('performSelectMax', useMax, options.count, function(){
-        done();
-      });
+  var genMethod = function(useMax){
+    return {
+      run: function(options, done){
+        Meteor.call('performSelectMax', useMax, options.count, done);
+      },
+      reset: function(options, done){
+        Meteor.call('resetTableMax', options.rows, done);
+      }
     };
   };
   Benchmark.addCase({
     _label: 'Select MAX() vs. ORDER BY DESC LIMIT 1',
     _default: {
-      rows: 10000,
-      count: 10000,
-      sampleSize: 1
+      rows: 5000,
+      count: 1000,
+      sampleSize: 3
     },
-    'max': {
-      run: run(true),
-      reset: reset
-    },
-    'order-by-desc': {
-      run: run(false),
-      reset: reset
-    }
+    'max': genMethod(true),
+    'order-by-desc': genMethod(false)
   });
 
 }else if(Meteor.isServer){
-
-
-  var dbMax;
-
-  var TABLE = 'perf_max_updates';
+  var conn;
+  var TABLE = 'benchmark_max_vs_orderby';
 
   Meteor.startup(function(){
-    dbMax = mysql.createConnection(Meteor.settings.mysql);
-    dbMax.connect();
+    conn = mysql.createConnection(Meteor.settings.mysql);
+    conn.connect();
 
-    dbMax.queryEx('drop table if exists `' + TABLE + '`');
-    dbMax.initUpdateTable(TABLE);
+    conn.queryEx('drop table if exists `' + TABLE + '`');
+    conn.initUpdateTable(TABLE);
   });
 
   Meteor.methods({
     resetTableMax: function(count){
       // Truncate doesn't call delete trigger!
-      dbMax.queryEx('delete from `' + TABLE + '`');
-      dbMax.queryEx(function(esc, escId){
+      conn.queryEx('delete from `' + TABLE + '`');
+      conn.queryEx(function(esc, escId){
         var query = 'INSERT INTO `' + TABLE + '` (`key`, `update`) VALUES ';
         var rows = [];
         var key;
@@ -58,29 +53,30 @@ if(Meteor.isClient){
       });
     },
     performSelectMax: function(useMax, count){
+      var query;
       for(var i = 0; i < count; i++){
+        query = [
+          'UPDATE `' + TABLE + '` as p',
+          'JOIN (',
+        ];
         if(useMax){
-          dbMax.queryEx([
-            'UPDATE `' + TABLE + '` as p',
-            'JOIN (',
+          query = query.concat([
             'SELECT MAX(p1.`update`) AS max FROM',
             '`' + TABLE + '` as p1',
-            ') as g',
-            'SET p.`update`= g.max + 1',
-            'WHERE `key` = 1'
-          ].join('\n'));
+          ]);
         }else{
-          dbMax.queryEx([
-            'UPDATE `' + TABLE + '` as p',
-            'JOIN (',
+          query = query.concat([
             'SELECT p1.`update` AS max FROM',
             '`' + TABLE + '` as p1',
             'ORDER BY p1.`update` DESC LIMIT 1',
-            ') as g',
-            'SET p.`update`= g.max + 1',
-            'WHERE `key` = 1'
-          ].join('\n'));
+          ]);
         }
+        query = query.concat([
+          ') as g',
+          'SET p.`update`= g.max + 1',
+          'WHERE `key` = 1'
+        ]);
+        conn.queryEx(query.join('\n'));
       }
     }
   });

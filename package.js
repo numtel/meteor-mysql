@@ -58,11 +58,10 @@ Package.onTest(function(api) {
     'test/MysqlSubscription.js'
   ]);
 
-  // Benchmark helpers
+  // Benchmark databases
   api.addFiles([
-    'test/benchmark/MongoPlayers.js',
-    'test/benchmark/mysql.poll.js',
-    'test/benchmark/mysql.udf.js'
+    'test/benchmark/server.mongo.js',
+    'test/benchmark/server.mysql.js'
   ], 'server');
 
   // Benchmarks
