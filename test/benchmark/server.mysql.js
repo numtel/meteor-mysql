@@ -11,6 +11,13 @@ var connections = [
       conn.queryEx('drop table if exists `' + upTable + '`');
       conn.initUpdateTable(upTable); 
     }
+  },
+  {
+    tablePrefix: 'benchmark_binlog_',
+    init: function(conn){
+      var upTable = this.tablePrefix + 'updates';
+      conn.initBinlogTail('/var/log/mysql/mysql-bin.000006', upTable);
+    }
   }
 ]
 

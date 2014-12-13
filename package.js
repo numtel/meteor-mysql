@@ -6,7 +6,8 @@ Package.describe({
 });
 
 Npm.depends({
-  mysql: '2.5.3'
+  mysql: '2.5.3',
+  bintail: '0.0.1'
 });
 
 Package.onUse(function(api) {
