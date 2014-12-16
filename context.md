@@ -57,11 +57,11 @@ MySQL supports a `FILE` privilege on users that allows data to be read and writt
 
 Obtain direct log of changes to database.
 
-By using Statement-Based replication, the binary log can be tailed. This process can be slow though: a file (that can grow to be many gigabytes) must be watched for new statements or rows. Found solutions for MySQL binlog tailing in Javascript utilize the `watchFile()` method of the `fs` module, polling for changes to the [statistics of the] file.
+By using Statement-Based replication, the binary log can be tailed. This process can be slow though: a file (that can grow to be many gigabytes) must be watched for new statements or rows. Found solutions for MySQL binlog tailing in Javascript utilize the `watch()` or `watchFile()` method of the `fs` module, polling for changes to the [statistics of the] file.
 
-* [Script that uses `mysqlbinlog`](https://gist.github.com/petethomas/1572119) - Very basic. Works but requires a lot more to provide necessary features
-* [Another script](https://gist.github.com/laverdet/958588) - Does not work in my tests, but the code is interesting
-* [ZongJi NPM module](https://github.com/nevill/zongji) - Unclear how this works, example does not work for me
+* [Script that uses `mysqlbinlog`](https://gist.github.com/petethomas/1572119) - Example of using `mysqlbinlog` command line interpreter included with MySQL
+* [Another script](https://gist.github.com/laverdet/958588) - Does not work in my tests, but it looks like it would parse a binlog in `statement` mode. `statement` mode results in a smaller replication log but for determining when to refresh a `select` statement, `row` mode is required unless a full replication of the data is kept.
+* [ZongJi NPM module](https://github.com/nevill/zongji) - Similar to the first example that uses `mysqlbinlog` except the binlog parser is written entirely in Javascript. Very promising but not finished, many column types still need to be supported.
 * [Hupu NPM module](https://github.com/HupuInc/node-mysql-listener) - Not tested but requires C++ compilation so probably not a good option as `sudo` or `root` would be required for installation along with the MySQL development package.
 
 The main advantage to using the Binlog would be to enable updates without modifying the underlying database with triggers. Theoretically, realizing Binlog updates appears as an ultimate solution to Meteor-MySQL integration but benchmarks and real world performance are necessary to tell the full story.
