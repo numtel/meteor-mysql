@@ -6,6 +6,7 @@ Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with a 
 * [Quick tutorial on using this package](getting_started.md)
 * [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
 * [Explanation of the implementation design process](context.md)
+* [Talk at Meteor Devshop SF, December 2014](https://www.youtube.com/watch?v=EJzulpXZn6g)
 
 ## Server Implements
 
