@@ -64,6 +64,8 @@ $ sudo cp meteor_update.so $(mysql_config --plugindir)
 
 Due to the early stage of development, the default settings must be used: port 9801 on localhost.
 
+Development of this feature has been abandoned in favor of using MySQL's binary replication logs to transmit updates. See the [`more_fields` branch](https://github.com/nevill/zongji/tree/more_fields) I have created on the `zongji` Binlog tailer NPM package. Expect this package to be updated as soon as I get the rest of the fields sorted!
+
 ### `connection.select(subscription, options)`
 
 Bind a SQL select statement to a subscription object (e.g. context of a `Meteor.publish()` function).
