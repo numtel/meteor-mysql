@@ -66,7 +66,7 @@ By using Statement-Based replication, the binary log can be tailed. This process
 
 The main advantage to using the Binlog would be to enable updates without modifying the underlying database with triggers. Theoretically, realizing Binlog updates appears as an ultimate solution to Meteor-MySQL integration but benchmarks and real world performance are necessary to tell the full story.
 
-My progress on completing the zongji NPM module can be seen in the project under the [`more fields` branch](https://github.com/nevill/zongji/tree/more_fields).
+The [ZongJi NPM Module](https://github.com/nevill/zongji) has been completed and development of a `mysql-live-select` NPM module is beginning. <sup>2014/12/31</sup>
 
 ## Postgres Sequel
 

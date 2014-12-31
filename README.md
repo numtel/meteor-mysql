@@ -38,33 +38,11 @@ Specify a table (as string) to use for storing the keys used for notifying updat
 
 ### `connection.initUpdateServer([port], [hostName])`
 
-***Under construction***
+***Abandoned feature, see notice:***
 
-Instead of polling a table for updates, broadcast updates from MySQL directly to your Meteor server. If you can't wait for an installation script and more testing, you can try it using the following commands.
+Development of this feature has been abandoned in favor of using MySQL's binary replication logs to transmit updates. 
 
-```bash
-# Install dependency on CentOS
-$ yum install mysql-devel
-
-# Install dependency on openSUSE
-$ zypper install libmysqlclient-devel
-
-# Install dependency on Debian/Ubuntu
-$ sudo apt-get install libmysqlclient-dev
-
-# Install dependency on Mac OS X (Does this work??)
-$ brew install mysql-connector-c
-
-# Compile
-$ gcc $(mysql_config --cflags) -shared -fPIC -o meteor_update.so lib/meteor_update.c
-
-# Install
-$ sudo cp meteor_update.so $(mysql_config --plugindir)
-```
-
-Due to the early stage of development, the default settings must be used: port 9801 on localhost.
-
-Development of this feature has been abandoned in favor of using MySQL's binary replication logs to transmit updates. See the [`more_fields` branch](https://github.com/nevill/zongji/tree/more_fields) I have created on the `zongji` Binlog tailer NPM package. Expect this package to be updated as soon as I get the rest of the fields sorted!
+The [ZongJi NPM Module](https://github.com/nevill/zongji) has been completed and development of a `mysql-live-select` NPM module to use as the core component for this project is beginning. <sup>2014/12/31</sup>
 
 ### `connection.select(subscription, options)`
 
