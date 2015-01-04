@@ -56,7 +56,7 @@ The update table method automatically installs a new table as well as triggers o
 
 Bind a SQL select statement to a subscription object (e.g. context of a `Meteor.publish()` function).
 
-`initUpdateTable()` or `initUpdateServer()` must be called before publishing a select statement.
+`initUpdateTable()` or `initBinlog()` must be called before publishing a select statement.
 
 Option | Type | Required | Description
 ------|-------|-----------|--------------
@@ -69,6 +69,7 @@ Each trigger object may contain the following properties:
 Name | Type | Required | Description
 -----|-------| --------|--------------
 `table` | `string` | Required | Name of table to hook trigger
+`database` | `string` | Optional | Only used with binary log. Specify database if not specified in connection settings.
 `condition` | `string` or `function` | Optional | Provide a conditional to filter rows
 
 #### Trigger Conditions
@@ -104,7 +105,7 @@ $ROW.name = "dude" or $ROW.score > 200
 
 * When a function is allowed in place of a string, use the `queryEx()` argument structure to escape values and identifiers.
 
-* Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 200 ms.
+* Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 200 ms. (Update table only)
 
 * MySQL command `truncate` does not use `delete` so the trigger will not be called and subscriptions will not be updated. Use slower `delete` without a `where` clause to perform same operation while using subscriptions.
 

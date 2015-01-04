@@ -40,9 +40,14 @@ Meteor.startup(function(){
       triggers: [
         {
           table: 'players',
-          condition: function(row, newRow){
-            return row.name === name;
-          }
+          condition:
+            Meteor.settings.binlog ? 
+              function(row, newRow){
+                return row.name === name;
+              }
+            : function(esc, escId){
+                return '$ROW.name = ' + esc(name);
+              }
         }
       ]
     });
