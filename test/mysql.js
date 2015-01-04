@@ -15,8 +15,12 @@ Meteor.startup(function(){
   db.queryEx(function(esc, escId){
     return 'drop table if exists ' + escId(updateTable);
   });
-  db.initUpdateTable(updateTable);
-//   db.initUpdateServer();
+
+  if(Meteor.settings.binlog){
+    db.initBinlog(Meteor.settings.mysql);
+  }else{
+    db.initUpdateTable(updateTable);
+  }
 
   Meteor.publish('allPlayers', function(){
     db.select(this, {
@@ -36,8 +40,8 @@ Meteor.startup(function(){
       triggers: [
         {
           table: 'players',
-          condition: function(esc, escId){
-            return '$ROW.name = ' + esc(name);
+          condition: function(row, newRow){
+            return row.name === name;
           }
         }
       ]
@@ -63,7 +67,7 @@ Meteor.startup(function(){
       });
     },
     'getQueries': function(){
-      return queries; // test/mock.connection.query.js
+      return db.__queries; // test/mock.connection.query.js
     }
   });
 
@@ -128,6 +132,9 @@ Tinytest.add(SUITE_PREFIX + 'initUpdateTable', function(test){
 });
 
 Tinytest.add(SUITE_PREFIX + 'Trigger contents preserved', function(test){
+  var table = db._updateTable;
+  if(!table) return; // Only run test in poll table mode
+
   var result = db.queryEx(function(esc, escId){
     return [
       "SELECT ACTION_STATEMENT AS body",

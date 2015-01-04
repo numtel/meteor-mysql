@@ -3,7 +3,9 @@
     "host": "localhost",
     "user": "root",
     "password": "numtel",
-    "database": "test_package"
+    "database": "test_package",
+    "serverId": 129,
+    "minInterval": 200
   },
-  "udf": true
+  "binlog": false
 }

@@ -5,5 +5,5 @@
     "password": "",
     "database": "myapp_test"
   },
-  "udf": false
+  "binlog": false
 }

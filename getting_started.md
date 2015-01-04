@@ -8,6 +8,8 @@ $ meteor add numtel:mysql
 
 Publish a select statement, specifying when to refresh the query. By utilizing triggers and a highly optimized update table, polling queries are very simple and run quickly.
 
+> This tutorial displays how to utilize the update table transmission method. See the readme about using the Binary log transmission method for a more robust solution.
+
 ```javascript
 // On the server
 

@@ -3,7 +3,7 @@
 // test/benchmark/insertMany.js
 
 // Benchmark number of inserts published to client per second
-// Compare MySQL poll table, UDF TCP callback, Mongo, and Mongo-Direct
+// Compare MySQL poll table, MySQL binlog, Mongo, and Mongo-Direct
 var genMysqlTest = function(prefix){
   var subscription = new MysqlSubscription(prefix + 'players');
   return {
@@ -78,10 +78,10 @@ Benchmark.addCase({
     count: 1000,
     sampleSize: 1,
     // Explictly specify methods for easy omission
-    methods: ['mysql-poll', 'mysql-udf', 'mongo-standard', 'mongo-direct']
+    methods: ['mysql-poll', 'mysql-binlog', 'mongo-standard', 'mongo-direct']
   },
   'mysql-poll': genMysqlTest('benchmark_poll_'),
-  'mysql-udf': genMysqlTest('benchmark_udf_'),
+  'mysql-binlog': genMysqlTest('benchmark_binlog_'),
   'mongo-standard': genMongoTest('insDocs'),
   'mongo-direct': genMongoTest('insDocsDirect')
 });

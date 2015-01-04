@@ -14,9 +14,13 @@ var connections = [
   }
 ]
 
-Meteor.settings.udf && connections.push({
-  tablePrefix: 'benchmark_udf_',
-  init: function(conn){ conn.initUpdateServer(); }
+Meteor.settings.binlog && connections.push({
+  tablePrefix: 'benchmark_binlog_',
+  init: function(conn){
+    var settings = _.clone(Meteor.settings.mysql);
+    settings.serverId++; // Unique serverId required
+    conn.initBinlog(settings);
+  }
 });
 
 connections.forEach(function(def){

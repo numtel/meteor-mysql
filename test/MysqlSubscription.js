@@ -59,41 +59,23 @@ function(test, done){
     test.equal(arguments.length, 2);
     eventRecords.push('removed');
   });
-  Meteor.call('getQueries', function(error, startQueries){
-    // NOTE: On server, the result argument of the Meteor method call is
-    //       passed by reference, i.e. startQueries===endQueries
-    var startQueriesLength = startQueries.length;
-    Meteor.call('insPlayer', newPlayer, 100);
+  Meteor.call('insPlayer', newPlayer, 100);
+  Meteor.setTimeout(function(){
+    var newExpected = expectedRows.slice();
+    newExpected.unshift({ name: newPlayer, score: 100 });
+    test.equal(expectResult(players, newExpected), true, 'Row inserted');
+    Meteor.call('delPlayer', newPlayer);
     Meteor.setTimeout(function(){
-      var newExpected = expectedRows.slice();
-      newExpected.unshift({ name: newPlayer, score: 100 });
-      test.equal(expectResult(players, newExpected), true, 'Row inserted');
-      Meteor.call('delPlayer', newPlayer);
-      Meteor.call('getQueries', function(error, endQueries){
-        var newQueries =
-          filterPollQueries(endQueries.slice(startQueriesLength));
-        var newQueriesResult = expectResult(newQueries, [
-          /^insert into `players`/i,
-          /^select \* from players/i,
-          /^delete from `players`/i
-        ]);
-        if(newQueriesResult !== true){
-          console.log(newQueries);
-        }
-        test.equal(newQueriesResult, true, 'Only running correct queries');
-        Meteor.setTimeout(function(){
-          players.removeEventListener(/test1/);
-          test.equal(expectResult(eventRecords, [
-            'update', 'changed', 'update', 'changed', 'update', 'changed',
-            'update', 'changed', 'update', 'added', 'update', 'changed',
-            'update', 'changed', 'update', 'changed', 'update', 'changed',
-            'update', 'removed']), true, 'Expected events firing');
-          test.equal(expectResult(players, expectedRows), true, 'Row removed');
-          done();
-        }, POLL_WAIT);
-      });
+      players.removeEventListener(/test1/);
+      test.equal(expectResult(eventRecords, [
+        'update', 'changed', 'update', 'changed', 'update', 'changed',
+        'update', 'changed', 'update', 'added', 'update', 'changed',
+        'update', 'changed', 'update', 'changed', 'update', 'changed',
+        'update', 'removed']), true, 'Expected events firing');
+      test.equal(expectResult(players, expectedRows), true, 'Row removed');
+      done();
     }, POLL_WAIT);
-  });
+  }, POLL_WAIT);
 });
 
 Tinytest.addAsync(SUITE_PREFIX + 'Conditional Trigger Update',

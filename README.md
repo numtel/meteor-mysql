@@ -1,11 +1,10 @@
 # numtel:mysql [![Build Status](https://travis-ci.org/numtel/meteor-mysql.svg?branch=master)](https://travis-ci.org/numtel/meteor-mysql)
 Reactive MySQL for Meteor
 
-Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with a few added methods.
+Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with help from the [`mysql-live-select` NPM module](https://github.com/numtel/mysql-live-select) to bring reactive `SELECT` statement result sets.
 
 * [Quick tutorial on using this package](getting_started.md)
 * [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
-* [Explanation of the implementation design process](context.md)
 * [Talk at Meteor Devshop SF, December 2014](https://www.youtube.com/watch?v=EJzulpXZn6g)
 
 ## Server Implements
@@ -32,17 +31,26 @@ var result = db.queryEx(function(esc, escId){
 * The first argument, `esc` is a function that escapes values in the query.
 * The second argument, `escId` is a function that escapes identifiers in the query.
 
+### `connection.initBinlog(settings)`
+
+Initialize the Binary replication log transmission method. The one argument required, `settings` should be an object containing the settings to connect to the MySQL server with a user that has been granted replication slave privileges.
+
+> Using the binary log transmission method requires your MySQL server to be configured properly. Please see the [installation instructions on the `mysql-live-select` NPM package repository](https://github.com/numtel/mysql-live-select#installation). 
+
+In addition to the [`node-mysql` connection settings](https://github.com/felixge/node-mysql#connection-options), the following settings are available:
+
+Setting | Type | Description
+--------|------|------------------------------
+`serverId`  | `integer` | [Unique number (1 - 2<sup>32</sup>)](http://dev.mysql.com/doc/refman/5.0/en/replication-options.html#option_mysqld_server-id) to identify this replication slave instance. Must be specified if running more than one instance.<br>**Default:** `1`
+`minInterval` | `integer` | Pass a number of milliseconds to use as the minimum between result set updates. Omit to refresh results on every update. May be changed at runtime.
+
 ### `connection.initUpdateTable(tableName)`
 
 Specify a table (as string) to use for storing the keys used for notifying updates to queries. The table will be created if it does not exist. To install for the first time, specify a table name that does not currently exist.
 
-### `connection.initUpdateServer([port], [hostName])`
+> When at all possible, it is recommended to use the binary log transmission method (`initBinlog()`).
 
-***Abandoned feature, see notice:***
-
-Development of this feature has been abandoned in favor of using MySQL's binary replication logs to transmit updates. 
-
-The [ZongJi NPM Module](https://github.com/nevill/zongji) has been completed and development of a `mysql-live-select` NPM module to use as the core component for this project is beginning. <sup>2014/12/31</sup>
+The update table method automatically installs a new table as well as triggers on any tables that need to be watched. This transmission method limits the number of Meteor servers acting as client to the MySQL server to 1.
 
 ### `connection.select(subscription, options)`
 
@@ -54,16 +62,45 @@ Option | Type | Required | Description
 ------|-------|-----------|--------------
 `query`|`string` or `function` | Required | Query to perform
 `triggers`|`array`| Required | Description of triggers to refresh query
-`pollInterval` | `number` | Optional | Poll delay duration in milliseconds
+`pollInterval` | `number` | Optional | Poll delay duration in milliseconds (only used with the Update Table, not Binary log)
 
 Each trigger object may contain the following properties:
 
 Name | Type | Required | Description
 -----|-------| --------|--------------
 `table` | `string` | Required | Name of table to hook trigger
-`condition` | `string` or `function` | Optional | Access new row on insert or old row on update/delete using `$ROW`<br><br>*Example:*<br>`$ROW.name = "dude" or $ROW.score > 200`
+`condition` | `string` or `function` | Optional | Provide a conditional to filter rows
 
-**Notes:**
+#### Trigger Conditions
+
+Trigger conditions are defined differently based on the transmission method used:
+
+**Binary Log**
+
+When using the binary log transmission method (`initBinlog()`), a condition function accepts one or two arguments:
+
+Argument Name | Description
+--------------|-----------------------------
+`row`         | Table row data
+`newRow`      | New row data (only available on `UPDATE` queries)
+
+Return `true` when the row data meets the condition to update the result set.
+
+```javascript
+function(row, newRow){ return row.id === myId }
+```
+
+**Update Table**
+
+When using the update table transmision method (`initUpdateTable()`), a condition can be either string or function (in the `queryEx()` syntax).
+
+Access new row on insert or old row on update/delete using `$ROW`. This snippet is inserted into a SQL trigger so be very careful with the formatting.
+
+```
+$ROW.name = "dude" or $ROW.score > 200
+```
+
+#### Notes
 
 * When a function is allowed in place of a string, use the `queryEx()` argument structure to escape values and identifiers.
 
