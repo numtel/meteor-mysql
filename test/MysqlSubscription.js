@@ -236,3 +236,31 @@ function(test, done){
     Meteor.call('insPlayer', newPlayer.name, newPlayer.score);
   });
 });
+
+Tinytest.addAsync(SUITE_PREFIX + 'Stop Method',
+function(test, done){
+  var testSub = new MysqlSubscription('allPlayers');
+  testSub.addEventListener('update', function(){
+    testSub.removeEventListener('update');
+    Meteor.setTimeout(function(){
+      testSubReady();
+    }, 100);
+  });
+
+  var testSubReady = function(){
+    testSub.addEventListener('added.stop', function(){
+      test.equal(0, 1, 'Added event should not have been emitted');
+    });
+
+    testSub.stop();
+
+    Meteor.call('insPlayer', 'After Stop', 100);
+
+    // Wait to see if added event dispatches
+    Meteor.setTimeout(function(){
+      testSub.removeEventListener('added.stop');
+      Meteor.call('delPlayer', 'After Stop');
+      done();
+    }, 200);
+  };
+});
