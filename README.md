@@ -33,9 +33,9 @@ var result = db.queryEx(function(esc, escId){
 
 ### `connection.initBinlog(settings)`
 
-* :horse: **This feature has only been tested to work with MySQL 5.5 (specifically, 5.5.40). Support for 5.6 is currently under construction.**
-
 Initialize the Binary replication log transmission method. The one argument required, `settings` should be an object containing the settings to connect to the MySQL server with a user that has been granted replication slave privileges.
+
+This feature has been tested to work with MySQL 5.5.40 and 5.6.19. Support for all MySQL server versions >= 5.1.15 is expected.
 
 > Using the binary log transmission method requires your MySQL server to be configured properly. Please see the [installation instructions on the `mysql-live-select` NPM package repository](https://github.com/numtel/mysql-live-select#installation). 
 
