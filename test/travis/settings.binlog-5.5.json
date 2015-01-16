@@ -1,0 +1,10 @@
+{
+  "mysql": {
+    "host": "localhost",
+    "port": 3355,
+    "user": "root",
+    "password": "",
+    "database": "myapp_test"
+  },
+  "binlog": true
+}
