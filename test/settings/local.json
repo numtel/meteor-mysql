@@ -1,11 +1,11 @@
 {
   "mysql": {
-    "host": "localhost",
-    "user": "root",
-    "password": "numtel",
-    "database": "test_package",
-    "serverId": 129,
-    "minInterval": 200
+    "host"        : "localhost",
+    "user"        : "root",
+    "password"    : "numtel",
+    "database"    : "test_package",
+    "serverId"    : 129,
+    "minInterval" : 200
   },
-  "binlog": false
+  "recreateDb": false
 }

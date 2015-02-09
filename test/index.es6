@@ -3,7 +3,22 @@
 // test/index.js
 
 // Configure publications
+var database = Meteor.settings.mysql.database;
+
+if(Meteor.settings.recreateDb){
+  // Primarily for Travis CI compat
+  delete Meteor.settings.mysql.database;
+}
+
 var liveDb = new LiveMysql(Meteor.settings.mysql);
+
+if(Meteor.settings.recreateDb){
+  querySequence(liveDb.db, [
+    'DROP DATABASE IF EXISTS ' + liveDb.db.escapeId(database),
+    'CREATE DATABASE ' + liveDb.db.escapeId(database),
+    'USE ' + liveDb.db.escapeId(database),
+  ]);
+}
 
 Meteor.startup(function(){
   insertSampleData();
@@ -11,7 +26,7 @@ Meteor.startup(function(){
   Meteor.publish('allPlayers', function(){
     return liveDb.select(
       `SELECT * FROM players ORDER BY score DESC`,
-      [ { table: 'players' } ]
+      [ { database, table: 'players' } ]
     );
   });
 
@@ -20,6 +35,7 @@ Meteor.startup(function(){
       `SELECT id, score FROM players WHERE name = ${liveDb.db.escape(name)}`,
       [
         {
+          database,
           table: 'players',
           condition: function(row, newRow){
             return row.name === name;

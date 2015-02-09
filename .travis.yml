@@ -5,4 +5,7 @@ node_js:
 before_install:
   - "curl -L http://git.io/ejPSng | /bin/sh"
 before_script:
-  - mysql -e 'create database myapp_test;'
+  - sudo apt-get install libaio1 libaio-dev
+  - ./test/settings/travis-install.sh
+after_script:
+  - kill $(cat mysql-5.5.41-linux2.6-x86_64/mysql.pid)

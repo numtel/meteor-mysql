@@ -1,12 +1,12 @@
 # numtel:mysql [![Build Status](https://travis-ci.org/numtel/meteor-mysql.svg?branch=master)](https://travis-ci.org/numtel/meteor-mysql)
 Reactive MySQL for Meteor
 
-Provides Meteor integration of the [`mysql-live-select` NPM module](https://github.com/numtel/mysql-live-select), bringing reactive `SELECT` statement result sets.
+Provides Meteor integration of the [`mysql-live-select` NPM module](https://github.com/numtel/mysql-live-select), bringing reactive `SELECT` statement result sets from MySQL >= 5.1.15.
 
 * [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
 * [Talk at Meteor Devshop SF, December 2014](https://www.youtube.com/watch?v=EJzulpXZn6g)
 
-> This documentation covers `numtel:mysql` **>= 0.1.0**. For older versions that included the trigger poll table, see the [old branch](https://github.com/numtel/meteor-mysql/tree/old).
+> This documentation covers `numtel:mysql` **>= 0.1.0**. For older versions that included the trigger poll table that worked with MySQL < 5.1.15, see the [old branch](https://github.com/numtel/meteor-mysql/tree/old).
 
 ## Server Implements
 

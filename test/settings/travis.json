@@ -1,9 +1,12 @@
 {
   "mysql": {
-    "host": "localhost",
-    "user": "root",
-    "password": "",
-    "database": "myapp_test"
+    "host"        : "localhost",
+    "user"        : "root",
+    "password"    : "",
+    "port"        : 3355,
+    "database"    : "myapp_test",
+    "serverId"    : 129,
+    "minInterval" : 200
   },
-  "binlog": false
+  "recreateDb": true
 }

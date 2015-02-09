@@ -17,10 +17,11 @@ Package.onUse(function(api) {
     'ddp',
     'tracker'
   ]);
-  api.addFiles([ 'lib/LiveMysql.js' ], 'server');
-  api.addFiles([ 'lib/MysqlSubscription.js' ], ['client', 'server']);
 
+  api.addFiles('lib/LiveMysql.js', 'server');
   api.export('LiveMysql', 'server');
+
+  api.addFiles('lib/MysqlSubscription.js');
   api.export('MysqlSubscription');
 });
 
