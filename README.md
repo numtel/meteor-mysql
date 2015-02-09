@@ -1,4 +1,4 @@
-# numtel:mysql [![Build Status](https://travis-ci.org/numtel/meteor-mysql.svg?branch=master)](https://travis-ci.org/numtel/meteor-mysql)
+# numtel:mysql [![Build Status](https://travis-ci.org/numtel/meteor-mysql.svg?branch=old)](https://travis-ci.org/numtel/meteor-mysql)
 Reactive MySQL for Meteor
 
 Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with help from the [`mysql-live-select` NPM module](https://github.com/numtel/mysql-live-select) to bring reactive `SELECT` statement result sets.
@@ -6,6 +6,13 @@ Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with he
 * [Quick tutorial on using this package](getting_started.md)
 * [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
 * [Talk at Meteor Devshop SF, December 2014](https://www.youtube.com/watch?v=EJzulpXZn6g)
+
+## Installation
+
+To install this non-current version, use the following command:
+```
+meteor add numtel:mysql@0.0.20
+```
 
 ## Server Implements
 
