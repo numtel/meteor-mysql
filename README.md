@@ -6,6 +6,8 @@ Provides Meteor integration of the [`mysql-live-select` NPM module](https://gith
 * [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
 * [Talk at Meteor Devshop SF, December 2014](https://www.youtube.com/watch?v=EJzulpXZn6g)
 
+> This documentation covers `numtel:mysql` **>= 0.1.0**. For older versions that included the trigger poll table, see the [old branch](https://github.com/numtel/meteor-mysql/tree/old).
+
 ## Server Implements
 
 This package provides the `LiveMysql` class as defined in the [`mysql-live-select` NPM package](https://github.com/numtel/mysql-live-select). Be sure to follow the installation instructions for configuring your MySQL server to output the binary log.
