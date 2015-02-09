@@ -3,6 +3,7 @@ Reactive MySQL for Meteor
 
 Provides Meteor integration of the [`mysql-live-select` NPM module](https://github.com/numtel/mysql-live-select), bringing reactive `SELECT` statement result sets from MySQL >= 5.1.15.
 
+* [How to publish joined queries that update efficiently](https://github.com/numtel/meteor-mysql/wiki/Publishing-Efficient-Joined-Queries)
 * [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
 * [Talk at Meteor Devshop SF, December 2014](https://www.youtube.com/watch?v=EJzulpXZn6g)
 
