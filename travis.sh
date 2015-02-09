@@ -1,2 +1,2 @@
 #!/bin/sh
-meteor "$@" --settings test/settings.travis.json
+meteor "$@" --settings test/settings/travis.json

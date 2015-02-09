@@ -16,12 +16,6 @@ var expectedRows = [ // test/mysql.js :: insertSampleData()
   { name: 'Kepler', score: 40 }
 ];
 
-var filterPollQueries = function(queries){
- return _.filter(queries, function(query){
-   return !query.match(/select `key`, `update` from `/i);
-  });
-};
-
 Tinytest.addAsync(SUITE_PREFIX + 'Initialization', function(test, done){
   Meteor.setTimeout(function(){
     test.isTrue(players.ready());
@@ -88,31 +82,16 @@ function(test, done){
       var testElVal = parseInt($.trim(testEl.textContent), 10);
       test.equal(testElVal, 60, 'Reactive template');
     }
-    Meteor.call('getQueries', function(error, startQueries){
-      // NOTE: On server, the result argument of the Meteor method call is
-      //       passed by reference, i.e. startQueries===endQueries
-      var startQueriesLength = startQueries.length;
-      Meteor.call('setScore', myScore[0].id, 30);
-      Meteor.setTimeout(function(){
-        Meteor.call('getQueries', function(error, endQueries){
-          var newQueries =
-            filterPollQueries(endQueries.slice(startQueriesLength));
-          var uniqueLength = _.unique(newQueries).length;
-          if(uniqueLength !== newQueries.length){
-            console.log(newQueries);
-          }
-          test.equal(uniqueLength, newQueries.length,
-            'Ensure no duplicated queries');
-          test.equal(myScore[0].score, 30);
-          if(Meteor.isClient){
-            testElVal = parseInt($.trim(testEl.textContent), 10);
-            test.equal(testElVal, 30, 'Reactive template');
-          }
-          Meteor.call('setScore', myScore[0].id, 60);
-          done();
-        });
-      }, POLL_WAIT);
-    });
+    Meteor.call('setScore', myScore[0].id, 30);
+    Meteor.setTimeout(function(){
+      test.equal(myScore[0].score, 30);
+      if(Meteor.isClient){
+        testElVal = parseInt($.trim(testEl.textContent), 10);
+        test.equal(testElVal, 30, 'Reactive template');
+      }
+      Meteor.call('setScore', myScore[0].id, 60);
+      done();
+    }, POLL_WAIT);
   }, POLL_WAIT);
 });
 

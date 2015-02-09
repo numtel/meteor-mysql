@@ -1,115 +1,29 @@
 # numtel:mysql [![Build Status](https://travis-ci.org/numtel/meteor-mysql.svg?branch=master)](https://travis-ci.org/numtel/meteor-mysql)
 Reactive MySQL for Meteor
 
-Wrapper of the [MySQL NPM module](https://github.com/felixge/node-mysql) with help from the [`mysql-live-select` NPM module](https://github.com/numtel/mysql-live-select) to bring reactive `SELECT` statement result sets.
+Provides Meteor integration of the [`mysql-live-select` NPM module](https://github.com/numtel/mysql-live-select), bringing reactive `SELECT` statement result sets.
 
-* [Quick tutorial on using this package](getting_started.md)
 * [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
 * [Talk at Meteor Devshop SF, December 2014](https://www.youtube.com/watch?v=EJzulpXZn6g)
 
 ## Server Implements
 
-### `mysql`
+This package provides the `LiveMysql` class as defined in the [`mysql-live-select` NPM package](https://github.com/numtel/mysql-live-select). Be sure to follow the installation instructions for configuring your MySQL server to output the binary log.
 
-The `mysql` module is exposed to the server side of your application when this package is installed.
+### `LiveMysql.prototype.select()`
 
-See the [MySQL NPM module documentation on GitHub](https://github.com/felixge/node-mysql) for very detailed instructions on this module.
-
-If you are currently using the `pcel:mysql` package, the interface will be exactly the same except for the following methods which are added to each connection:
-
-### `connection.queryEx(query)`
-
-Perform any query synchronously and return the result. The single argument may contain a string or a function. A function may be passed that accepts two arguments. See example:
+In this Meteor package, the `LiveMysqlSelect` object returned by the `select()` method is modified to act as a cursor that can be published.
 
 ```javascript
-var result = db.queryEx(function(esc, escId){
-  return 'update ' + escId(table) +
-         ' set `score`=`score` + ' + esc(amount) +
-         ' where `id`=' + esc(id);
+var liveDb = new LiveMysql(Meteor.settings.mysql);
+
+Meteor.publish('allPlayers', function(){
+  return liveDb.select(
+    `SELECT * FROM players ORDER BY score DESC`,
+    [ { table: 'players' } ]
+  );
 });
 ```
-* The first argument, `esc` is a function that escapes values in the query.
-* The second argument, `escId` is a function that escapes identifiers in the query.
-
-### `connection.initBinlog(settings)`
-
-Initialize the Binary replication log transmission method. The one argument required, `settings` should be an object containing the settings to connect to the MySQL server with a user that has been granted replication slave privileges.
-
-This feature has been tested to work with MySQL 5.5.40 and 5.6.19. Support for all MySQL server versions >= 5.1.15 is expected.
-
-> Using the binary log transmission method requires your MySQL server to be configured properly. Please see the [installation instructions on the `mysql-live-select` NPM package repository](https://github.com/numtel/mysql-live-select#installation). 
-
-In addition to the [`node-mysql` connection settings](https://github.com/felixge/node-mysql#connection-options), the following settings are available:
-
-Setting | Type | Description
---------|------|------------------------------
-`serverId`  | `integer` | [Unique number (1 - 2<sup>32</sup>)](http://dev.mysql.com/doc/refman/5.0/en/replication-options.html#option_mysqld_server-id) to identify this replication slave instance. Must be specified if running more than one instance.<br>**Default:** `1`
-`minInterval` | `integer` | Pass a number of milliseconds to use as the minimum between result set updates. Omit to refresh results on every update. May be changed at runtime.
-
-### `connection.initUpdateTable(tableName)`
-
-Specify a table (as string) to use for storing the keys used for notifying updates to queries. The table will be created if it does not exist. To install for the first time, specify a table name that does not currently exist.
-
-> When at all possible, it is recommended to use the binary log transmission method (`initBinlog()`).
-
-The update table method automatically installs a new table as well as triggers on any tables that need to be watched. This transmission method limits the number of Meteor servers acting as client to the MySQL server to 1.
-
-### `connection.select(subscription, options)`
-
-Bind a SQL select statement to a subscription object (e.g. context of a `Meteor.publish()` function).
-
-`initUpdateTable()` or `initBinlog()` must be called before publishing a select statement.
-
-Option | Type | Required | Description
-------|-------|-----------|--------------
-`query`|`string` or `function` | Required | Query to perform
-`triggers`|`array`| Required | Description of triggers to refresh query
-`pollInterval` | `number` | Optional | Poll delay duration in milliseconds (only used with the Update Table, not Binary log)
-
-Each trigger object may contain the following properties:
-
-Name | Type | Required | Description
------|-------| --------|--------------
-`table` | `string` | Required | Name of table to hook trigger
-`database` | `string` | Optional | Only used with binary log. Specify database if not specified in connection settings.
-`condition` | `string` or `function` | Optional | Provide a conditional to filter rows
-
-#### Trigger Conditions
-
-Trigger conditions are defined differently based on the transmission method used:
-
-**Binary Log**
-
-When using the binary log transmission method (`initBinlog()`), a condition function accepts one or two arguments:
-
-Argument Name | Description
---------------|-----------------------------
-`row`         | Table row data
-`newRow`      | New row data (only available on `UPDATE` queries)
-
-Return `true` when the row data meets the condition to update the result set.
-
-```javascript
-function(row, newRow){ return row.id === myId }
-```
-
-**Update Table**
-
-When using the update table transmision method (`initUpdateTable()`), a condition can be either string or function (in the `queryEx()` syntax).
-
-Access new row on insert or old row on update/delete using `$ROW`. This snippet is inserted into a SQL trigger so be very careful with the formatting.
-
-```
-$ROW.name = "dude" or $ROW.score > 200
-```
-
-#### Notes
-
-* When a function is allowed in place of a string, use the `queryEx()` argument structure to escape values and identifiers.
-
-* Every live-select utilizes the same poll timer. Passing a `pollInterval` will update the global poll delay. By default, the poll is intialized at 200 ms. (Update table only)
-
-* MySQL command `truncate` does not use `delete` so the trigger will not be called and subscriptions will not be updated. Use slower `delete` without a `where` clause to perform same operation while using subscriptions.
 
 ## Client/Server Implements
 
