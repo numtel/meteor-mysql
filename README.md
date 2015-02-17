@@ -69,7 +69,13 @@ Name | Listener Arguments | Description
 
 ## Tests / Benchmarks
 
-A MySQL server is required to run the test suite.
+A MySQL server configured to output the binary log in row mode is required to run the test suite.
+
+The MySQL connection settings must be configured in `test/settings/local.json`.
+
+The database specified should be an empty database with no tables because the tests will create and delete tables as needed.
+
+If you set the `recreateDb` value to true, the test suite will automatically create the database, allowing you to specify a database name that does not yet exist.
 
 ```bash
 # Install Meteor
@@ -81,10 +87,10 @@ $ cd meteor-mysql
 
 # Configure database settings in your favorite editor
 # (an empty database is suggested)
-$ ed test/settings.local.json
+$ ed test/settings/local.json
 
 # Run test/benchmark server
-$ meteor test-packages --settings test/settings.local.json ./
+$ meteor test-packages --settings test/settings/local.json ./
 
 ```
 
