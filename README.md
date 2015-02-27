@@ -69,17 +69,23 @@ Name | Listener Arguments | Description
 
 ## Closing connections between hot code-pushes
 
-With Meteor's hot code-push feature, a new connection the database server is requested with each restart. In order to close old connections, a handler to your application process's `SIGTERM` signal event must be added that calls the `end()` method on each `LiveMysql` instance in your application.
+With Meteor's hot code-push feature, a new connection the database server is requested with each restart. In order to close old connections, a handler to your application process's `SIGTERM` signal event must be added that calls the `end()` method on each `LiveMysql` instance in your application. Also, a handler for `SIGINT` can be used to close connections on exit.
 
-On the server-side of your application, add the event handler like this:
+On the server-side of your application, add event handlers like this:
 
 ```javascript
+
 var liveDb = new LiveMysql(Meteor.settings.mysql);
 
-process.on('SIGTERM', function() {
+var closeAndExit = function() {
   liveDb.end();
   process.exit();
-});
+};
+
+// Close connections on hot code push
+process.on('SIGTERM', closeAndExit);
+// Close connections on exit (ctrl + c)
+process.on('SIGINT', closeAndExit);
 ```
 
 ## Tests / Benchmarks
