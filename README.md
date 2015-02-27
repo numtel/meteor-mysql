@@ -67,6 +67,21 @@ Name | Listener Arguments | Description
 `removed` | `index, oldRow` | Row removed, after update
 `reset` | `msg` | Subscription reset (most likely due to code-push), before update
 
+## Closing connections between hot code-pushes
+
+With Meteor's hot code-push feature, a new connection the database server is requested with each restart. In order to close old connections, a handler to your application process's `SIGTERM` signal event must be added that calls the `end()` method on each `LiveMysql` instance in your application.
+
+On the server-side of your application, add the event handler like this:
+
+```javascript
+var liveDb = new LiveMysql(Meteor.settings.mysql);
+
+process.on('SIGTERM', function() {
+  liveDb.end();
+  process.exit();
+});
+```
+
 ## Tests / Benchmarks
 
 A MySQL server configured to output the binary log in row mode is required to run the test suite.
