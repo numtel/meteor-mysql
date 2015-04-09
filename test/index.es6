@@ -23,9 +23,10 @@ if(Meteor.settings.recreateDb){
 Meteor.startup(function(){
   insertSampleData();
 
-  Meteor.publish('allPlayers', function(){
+  Meteor.publish('allPlayers', function(limit){
     return liveDb.select(
-      `SELECT * FROM players ORDER BY score DESC`,
+      'SELECT * FROM players ORDER BY score DESC' +
+        (limit ? ' LIMIT ' + liveDb.db.escape(limit) : ''),
       [ { database, table: 'players' } ]
     );
   });

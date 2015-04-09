@@ -239,7 +239,28 @@ function(test, done){
     Meteor.setTimeout(function(){
       testSub.removeEventListener('added.stop');
       Meteor.call('delPlayer', 'After Stop');
-      done();
+      players.addEventListener('removed.afterStop', function(){
+        players.removeEventListener('removed.afterStop');
+        done();
+      });
     }, 200);
   };
+});
+
+Tinytest.addAsync(SUITE_PREFIX + 'Change Method',
+function(test, done){
+  test.equal(players.length, expectedRows.length);
+  // Limit players sub to 1 row
+  players.change(1);
+  Meteor.setTimeout(function() {
+    test.equal(players.length, 1);
+
+    // Reset players to original state
+    players.change();
+
+    Meteor.setTimeout(function() {
+      test.equal(players.length, expectedRows.length);
+      done();
+    }, POLL_WAIT);
+  }, POLL_WAIT);
 });

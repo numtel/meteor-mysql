@@ -40,6 +40,7 @@ The prototype inherits from `Array` and is extended with the following methods:
 
 Name | Description
 -----|--------------------------
+`change([args...])` | Change the subscription's arguments. Publication name and connection are preserved. *UI flickering may occur, please stand-by until I update this package with an improved diffing algorithm that will fix this.*
 `addEventListener(eventName, listener)` | Bind a listener function to this subscription
 `removeEventListener(eventName)` | Remove listener functions from an event queue
 `dispatchEvent(eventName, [args...])` | Call the listeners for a given event, returns boolean
