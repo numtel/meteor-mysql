@@ -250,10 +250,15 @@ function(test, done){
 Tinytest.addAsync(SUITE_PREFIX + 'Change Method',
 function(test, done){
   test.equal(players.length, expectedRows.length);
+  test.isTrue(players.ready());
+
   // Limit players sub to 1 row
   players.change(1);
+  test.isFalse(players.ready());
+  
   Meteor.setTimeout(function() {
     test.equal(players.length, 1);
+    test.isTrue(players.ready());
 
     // Reset players to original state
     players.change();
