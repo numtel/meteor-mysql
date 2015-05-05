@@ -9,7 +9,8 @@ if(Meteor.settings.recreateDb){
   delete Meteor.settings.mysql.database;
 }
 
-var liveDb = new LiveMysql(Meteor.settings.mysql);
+liveDb = new LiveMysql(Meteor.settings.mysql);
+liveDb.queryEx = queryEx.bind(liveDb.db);
 
 if(Meteor.settings.recreateDb){
   querySequence(liveDb.db, [

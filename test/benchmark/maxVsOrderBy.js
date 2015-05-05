@@ -27,15 +27,10 @@ if(Meteor.isClient){
   });
 
 }else if(Meteor.isServer){
-  var conn;
+  var conn = liveDb;
   var TABLE = 'benchmark_max_vs_orderby';
 
   Meteor.startup(function(){
-    conn = mysql.createConnection(Meteor.settings.mysql);
-    conn.connect();
-
-    conn.queryEx('drop table if exists `' + TABLE + '`');
-    conn.initUpdateTable(TABLE);
   });
 
   Meteor.methods({

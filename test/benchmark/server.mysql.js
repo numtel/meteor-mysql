@@ -3,70 +3,46 @@
 // test/benchmark/server.mysql.js
 
 // Provide server for MySQL benchmarks
-var connections = [
-  {
-    tablePrefix: 'benchmark_poll_',
-    init: function(conn){
-      var upTable = this.tablePrefix + 'updates';
-      conn.queryEx('drop table if exists `' + upTable + '`');
-      conn.initUpdateTable(upTable); 
-    }
-  }
-]
 
-Meteor.settings.binlog && connections.push({
-  tablePrefix: 'benchmark_binlog_',
-  init: function(conn){
-    var settings = _.clone(Meteor.settings.mysql);
-    settings.serverId++; // Unique serverId required
-    conn.initBinlog(settings);
-  }
+var conn = liveDb;
+var playersTable = 'benchmark_players';
+Meteor.startup(function(){
+  var settings = _.clone(Meteor.settings.mysql);
+  settings.serverId *= 2; // Unique serverId required
+
+  conn.queryEx('drop table if exists `' + playersTable + '`');
+  conn.queryEx([
+    "CREATE TABLE `" + playersTable + "` (",
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,",
+    "  `name` varchar(45) DEFAULT NULL,",
+    "  `score` int(11) NOT NULL DEFAULT '0',",
+    "  PRIMARY KEY (`id`)",
+    ") ENGINE=InnoDB DEFAULT CHARSET=latin1;"
+  ].join('\n'));
 });
 
-connections.forEach(function(def){
-  var conn;
-  var playersTable = def.tablePrefix + 'players';
-  Meteor.startup(function(){
-    conn = mysql.createConnection(Meteor.settings.mysql);
-    conn.connect();
-
-    def.init.call(def, conn);
-    
-    conn.queryEx('drop table if exists `' + playersTable + '`');
-    conn.queryEx([
-      "CREATE TABLE `" + playersTable + "` (",
-      "  `id` int(11) NOT NULL AUTO_INCREMENT,",
-      "  `name` varchar(45) DEFAULT NULL,",
-      "  `score` int(11) NOT NULL DEFAULT '0',",
-      "  PRIMARY KEY (`id`)",
-      ") ENGINE=InnoDB DEFAULT CHARSET=latin1;"
-    ].join('\n'));
+var connMethods = {};
+connMethods['benchmark_reset'] = function(){
+  // Truncate doesn't call delete trigger!
+  conn.queryEx('delete from `' + playersTable + '`');
+};
+connMethods['benchmark_insert'] = function(count){
+  if(typeof count !== 'number' || count < 1 || Math.floor(count) !== count)
+    throw new Error('invalid-count');
+  conn.queryEx(function(esc, escId){
+    var query = 'INSERT INTO `' + playersTable + '` (`name`, `score`) VALUES ';
+    var rows = [];
+    for(var i = 0; i < count; i++){
+      rows.push('(' + esc(randomString(10)) + ', ' +
+                esc(Math.floor(Math.random() * 20) * 5) + ')');
+    }
+    return query + rows.join(', ');
   });
+};
+Meteor.methods(connMethods);
 
-  var connMethods = {};
-  connMethods[def.tablePrefix + 'reset'] = function(){
-    // Truncate doesn't call delete trigger!
-    conn.queryEx('delete from `' + playersTable + '`');
-  };
-  connMethods[def.tablePrefix + 'insert'] = function(count){
-    if(typeof count !== 'number' || count < 1 || Math.floor(count) !== count)
-      throw new Error('invalid-count');
-    conn.queryEx(function(esc, escId){
-      var query = 'INSERT INTO `' + playersTable + '` (`name`, `score`) VALUES ';
-      var rows = [];
-      for(var i = 0; i < count; i++){
-        rows.push('(' + esc(randomString(10)) + ', ' +
-                  esc(Math.floor(Math.random() * 20) * 5) + ')');
-      }
-      return query + rows.join(', ');
-    });
-  };
-  Meteor.methods(connMethods);
-
-  Meteor.publish(playersTable, function(){
-    conn.select(this, {
-      query: 'select * from `' + playersTable + '` order by score desc',
-      triggers: [ { table: playersTable } ]
-    });
-  });
+Meteor.publish(playersTable, function(){
+  return conn.select(
+    'select * from `' + playersTable + '` order by score desc',
+    [ { table: playersTable } ]);
 });

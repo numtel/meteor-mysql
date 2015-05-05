@@ -3,9 +3,9 @@
 // test/benchmark/insertMany.js
 
 // Benchmark number of inserts published to client per second
-// Compare MySQL poll table, MySQL binlog, Mongo, and Mongo-Direct
-var genMysqlTest = function(prefix){
-  var subscription = new MysqlSubscription(prefix + 'players');
+// Compare MySQL binlog, Mongo, and Mongo-Direct
+var genMysqlTest = function(){
+  var subscription = new MysqlSubscription('benchmark_players');
   return {
     run: function(options, done){
       var startCount = subscription.length;
@@ -16,9 +16,8 @@ var genMysqlTest = function(prefix){
           done();
         }
       });
-      Meteor.call(prefix + 'insert', options.count, function(error){
+      Meteor.call('benchmark_insert', options.count, function(error){
         if(error && error.error === 404){
-          // Server connection (UDF) may not be available
           subscription.removeEventListener(/insertRows/);
           done();
         }
@@ -27,7 +26,7 @@ var genMysqlTest = function(prefix){
     },
     reset: function(options, done){
       if(subscription.length === 0) return done();
-      Meteor.call(prefix + 'reset');
+      Meteor.call('benchmark_reset');
       subscription.addEventListener('removed.resetTable', function(){
         if(subscription.length === 0){
           subscription.removeEventListener(/resetTable/);
@@ -78,10 +77,9 @@ Benchmark.addCase({
     count: 1000,
     sampleSize: 1,
     // Explictly specify methods for easy omission
-    methods: ['mysql-poll', 'mysql-binlog', 'mongo-standard', 'mongo-direct']
+    methods: ['mysql-binlog', 'mongo-standard', 'mongo-direct']
   },
-  'mysql-poll': genMysqlTest('benchmark_poll_'),
-  'mysql-binlog': genMysqlTest('benchmark_binlog_'),
+  'mysql-binlog': genMysqlTest(),
   'mongo-standard': genMongoTest('insDocs'),
   'mongo-direct': genMongoTest('insDocsDirect')
 });

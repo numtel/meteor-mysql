@@ -33,7 +33,10 @@ Package.onTest(function(api) {
     'autopublish',
     'insecure',
     'grigio:babel@0.1.1',
-    'numtel:mysql'
+    'numtel:mysql',
+    'numtel:benchmark-packages@0.0.1',
+    'mongo', // for benchmark
+    'thinksoftware:mongo-direct@1.0.2' // for benchmark
   ]);
   api.use('test-helpers'); // Did not work concatenated above
   api.addFiles([
@@ -47,11 +50,27 @@ Package.onTest(function(api) {
   ], 'client');
 
   api.addFiles([
+    'test/helpers/queryEx.js',
     'test/helpers/querySequence.js',
     'test/index.es6'
   ], 'server');
 
   api.addFiles([
     'test/MysqlSubscription.js'
+  ]);
+
+
+  // Benchmark databases
+  api.addFiles([
+    'test/benchmark/server.mongo.js',
+    'test/benchmark/server.mysql.js'
+  ], 'server');
+
+  // Benchmarks
+  api.addFiles([
+    'test/benchmark/insertMany.js'
+  ], 'client');
+  api.addFiles([
+    'test/benchmark/maxVsOrderBy.js'
   ]);
 });
