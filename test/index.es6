@@ -4,7 +4,6 @@
 
 // Configure publications
 var database = Meteor.settings.mysql.database;
-
 if(Meteor.settings.recreateDb){
   // Primarily for Travis CI compat
   delete Meteor.settings.mysql.database;
@@ -22,6 +21,13 @@ if(Meteor.settings.recreateDb){
 
 Meteor.startup(function(){
   insertSampleData();
+
+  Meteor.publish('errorRaising', function(){
+    return liveDb.select(
+      'SELECT * FROM invalid_table ORDER BY score DESC',
+      [ { database, table: 'invalid_table' } ]
+    );
+  });
 
   Meteor.publish('allPlayers', function(limit){
     return liveDb.select(

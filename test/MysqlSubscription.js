@@ -6,6 +6,9 @@ var SUITE_PREFIX = 'numtel:mysql - MysqlSubscription - ';
 var POLL_WAIT = 700; // update allowance
 var LOAD_COUNT = 10;
 
+// Test error handling (should output to console, not hang app)
+errorSub = new MysqlSubscription('errorRaising');
+
 players = new MysqlSubscription('allPlayers');
 myScore = new MysqlSubscription('playerScore', 'Maxwell');
 

@@ -1,13 +1,13 @@
 Package.describe({
   name: 'numtel:mysql',
   summary: 'MySQL support with Reactive Select Subscriptions',
-  version: '0.1.7',
+  version: '0.1.8',
   git: 'https://github.com/numtel/meteor-mysql.git'
 });
 
 Npm.depends({
   'mysql': '2.6.1',
-  'mysql-live-select': '0.0.18'
+  'mysql-live-select': '0.0.21'
 });
 
 Package.onUse(function(api) {

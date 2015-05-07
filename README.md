@@ -16,6 +16,8 @@ Provides Meteor integration of the [`mysql-live-select` NPM module](https://gith
 
 This package provides the `LiveMysql` class as defined in the [`mysql-live-select` NPM package](https://github.com/numtel/mysql-live-select). Be sure to follow the installation instructions for configuring your MySQL server to output the binary log.
 
+For operations other than `SELECT`, like `UPDATE` and `INSERT`, an active [`node-mysql`](https://github.com/felixge/node-mysql) connection is exposed on the `LiveMysql.db` property.
+
 ### `LiveMysql.prototype.select()`
 
 In this Meteor package, the `LiveMysqlSelect` object returned by the `select()` method is modified to act as a cursor that can be published.
