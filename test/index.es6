@@ -33,7 +33,7 @@ Meteor.startup(function(){
   Meteor.publish('allPlayers', function(limit){
     return liveDb.select(
       'SELECT * FROM players ORDER BY score DESC' +
-        (limit ? ' LIMIT ' + liveDb.db.escape(limit) : ''),
+        (typeof limit === 'number' ? ' LIMIT ' + liveDb.db.escape(limit) : ''),
       [ { database, table: 'players' } ]
     );
   });
