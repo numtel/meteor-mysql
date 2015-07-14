@@ -259,7 +259,7 @@ function(test, done){
   // Limit players sub to 0 row
   players.change(0);
   test.isFalse(players.ready());
-  
+
   Meteor.setTimeout(function() {
     test.equal(players.length, 0);
     test.isTrue(players.ready());
@@ -282,7 +282,7 @@ function(test, done){
   // Limit players sub to 1 row
   players.change(1);
   test.isFalse(players.ready());
-  
+
   Meteor.setTimeout(function() {
     test.equal(players.length, 1);
     test.isTrue(players.ready());
@@ -295,4 +295,51 @@ function(test, done){
       done();
     }, POLL_WAIT);
   }, POLL_WAIT);
+});
+
+
+Tinytest.addAsync(SUITE_PREFIX + 'Quick Change Synchronously',
+function(test, done){
+  // Change players sub multiple times synchronously
+  for (var i = 0; i < 10; i++) {
+    players.change(i);
+  }
+
+  // Reset to original state
+  players.change();
+
+  Meteor.setTimeout(function () {
+    test.equal(players.length, expectedRows.length);
+    done();
+  }, POLL_WAIT);
+});
+
+Tinytest.addAsync(SUITE_PREFIX + 'Quick Change Asynchronously',
+function(test, done){
+  // How many times to change sub arguments?
+  var LIMIT_MAX = 10;
+  // Milliseconds between each change
+  var CHANGE_TIMEOUT = 5;
+  // Change players sub multiple times asynchronously
+  var limitArg = 0;
+
+  var nextChange = function() {
+    // Change to the next state, without necessarily waiting for it to be ready
+    if(limitArg < LIMIT_MAX) {
+      limitArg++;
+
+      players.change(limitArg);
+      Meteor.setTimeout(nextChange, CHANGE_TIMEOUT);
+    } else {
+      // At end of possible states
+      // Reset to original state
+      players.change();
+
+      Meteor.setTimeout(function () {
+        test.equal(players.length, expectedRows.length);
+        done();
+      }, POLL_WAIT);
+    }
+  };
+  nextChange();
 });
