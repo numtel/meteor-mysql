@@ -10,7 +10,9 @@ Provides Meteor integration of the [`mysql-live-select` NPM module](https://gith
 * [Leaderboard example modified to use MySQL](https://github.com/numtel/meteor-mysql-leaderboard)
 * [Talk at Meteor Devshop SF, December 2014](https://www.youtube.com/watch?v=EJzulpXZn6g)
 
-> This documentation covers `numtel:mysql` **>= 0.1.0**. For older versions that included the trigger poll table that worked with MySQL < 5.1.15, see the [old branch](https://github.com/numtel/meteor-mysql/tree/old).
+> This documentation covers `numtel:mysql` **>= 1.0.0**. For older versions (0.1.0 - 0.1.14) that used the old difference calculator, see the [the tree from this commit](https://github.com/numtel/meteor-mysql/tree/9edd9ca83388cc82496f87e91153a4a9f51fb5de). Also see the [old documentation for `mysql-live-select` that matches these older versions](https://github.com/numtel/mysql-live-select/tree/89691160b7e1fbfde1ae7055980668ceb4182f8a).
+
+> For the oldest versions (< 0.1.0) that included the trigger poll table that worked with MySQL < 5.1.15, see the [old branch](https://github.com/numtel/meteor-mysql/tree/old).
 
 ## Server Implements
 
@@ -67,10 +69,7 @@ Name | Description
 
 Name | Listener Arguments | Description
 -----|-------------------|-----------------------
-`update` | `index, msg` | Any difference, before update
-`added` | `index, newRow` | Row inserted, after update
-`changed` | `index, oldRow, newRow` | Row updated, after update
-`removed` | `index, oldRow` | Row removed, after update
+`update` | `diff, data` | Data has been updated according to the differences in the `diff` object.
 `reset` | `msg` | Subscription reset (most likely due to code-push), before update
 
 ## Closing connections between hot code-pushes

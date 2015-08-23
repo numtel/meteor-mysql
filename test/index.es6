@@ -25,8 +25,8 @@ Meteor.startup(function(){
 
   Meteor.publish('errorRaising', function(){
     return liveDb.select(
-      'SELECT * FROM invalid_table ORDER BY score DESC',
-      [ { database, table: 'invalid_table' } ]
+      'SELECT * FROM this_will_cause_an_exception ORDER BY score DESC',
+      [ { database, table: 'this_will_cause_an_exception' } ]
     );
   });
 

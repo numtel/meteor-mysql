@@ -30,31 +30,13 @@ Tinytest.addAsync(SUITE_PREFIX + 'Initialization', function(test, done){
 Tinytest.addAsync(SUITE_PREFIX + 'Insert / Delete Row Sync',
 function(test, done){
   var newPlayer = 'Archimedes';
-  var eventRecords = [];
-  players.addEventListener('update.test1', function(index, msg){
-    test.equal(typeof index, 'number');
-    test.equal(typeof msg, 'object');
-    test.equal(arguments.length, 2);
-    eventRecords.push('update');
-  });
-  players.addEventListener('added.test1', function(index, newRow){
-    test.equal(typeof index, 'number');
-    test.equal(typeof newRow, 'object');
-    test.equal(arguments.length, 2);
-    eventRecords.push('added');
-  });
-  players.addEventListener('changed.test1', function(index, oldRow, newRow){
-    test.equal(typeof index, 'number');
-    test.equal(typeof oldRow, 'object');
-    test.equal(typeof newRow, 'object');
-    test.equal(arguments.length, 3);
-    eventRecords.push('changed');
-  });
-  players.addEventListener('removed.test1', function(index, oldRow){
-    test.equal(typeof index, 'number');
-    test.equal(typeof oldRow, 'object');
-    test.equal(arguments.length, 2);
-    eventRecords.push('removed');
+  var updateCount = 0;
+  players.addEventListener('update.test1', function(diff, data){
+    switch(updateCount) {
+      case 0: test.equal(data.length, 5); break;
+      case 1: test.equal(data.length, 4); break;
+    }
+    updateCount++;
   });
   Meteor.call('insPlayer', newPlayer, 100);
   Meteor.setTimeout(function(){
@@ -64,11 +46,6 @@ function(test, done){
     Meteor.call('delPlayer', newPlayer);
     Meteor.setTimeout(function(){
       players.removeEventListener(/test1/);
-      test.equal(expectResult(eventRecords, [
-        'update', 'changed', 'update', 'changed', 'update', 'changed',
-        'update', 'changed', 'update', 'added', 'update', 'changed',
-        'update', 'changed', 'update', 'changed', 'update', 'changed',
-        'update', 'removed']), true, 'Expected events firing');
       test.equal(expectResult(players, expectedRows), true, 'Row removed');
       done();
     }, POLL_WAIT);
@@ -196,16 +173,16 @@ function(test, done){
   var checkDone = function(){
     if(players.length === playersStartLength){
       test.equal(expectResult(players, expectedRows), true);
-      players.removeEventListener('removed');
+      players.removeEventListener('update.forDel');
       done();
     }
   };
 
-  players.addEventListener('added', function(){
-    if(players.length === playersStartLength + LOAD_COUNT){
+  players.addEventListener('update.forAdded', function(diff, data) {
+    if(players.length === playersStartLength + LOAD_COUNT) {
       Meteor.setTimeout(function(){
-        players.removeEventListener('added');
-        players.addEventListener('removed', checkDone);
+        players.removeEventListener('update.forAdded');
+        players.addEventListener('update.forDel', checkDone);
         _.each(newPlayers, function(newPlayer){
           Meteor.call('delPlayer', newPlayer.name);
         });
@@ -222,6 +199,7 @@ function(test, done){
 Tinytest.addAsync(SUITE_PREFIX + 'Stop Method',
 function(test, done){
   var testSub = new MysqlSubscription('allPlayers');
+  var playersStartLength = players.length;
   testSub.addEventListener('update', function(){
     testSub.removeEventListener('update');
     Meteor.setTimeout(function(){
@@ -230,8 +208,8 @@ function(test, done){
   });
 
   var testSubReady = function(){
-    testSub.addEventListener('added.stop', function(){
-      test.equal(0, 1, 'Added event should not have been emitted');
+    testSub.addEventListener('update.stop', function(diff, data){
+      test.equal(0, 1, 'Event should not have been emitted after stop');
     });
 
     testSub.stop();
@@ -240,11 +218,13 @@ function(test, done){
 
     // Wait to see if added event dispatches
     Meteor.setTimeout(function(){
-      testSub.removeEventListener('added.stop');
+      testSub.removeEventListener('update.stop');
       Meteor.call('delPlayer', 'After Stop');
-      players.addEventListener('removed.afterStop', function(){
-        players.removeEventListener('removed.afterStop');
-        done();
+      players.addEventListener('update.afterStop', function(diff, data){
+        if(players.length === playersStartLength) {
+          players.removeEventListener('update.afterStop');
+          done();
+        }
       });
     }, 200);
   };
