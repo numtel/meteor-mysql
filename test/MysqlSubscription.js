@@ -12,7 +12,7 @@ errorSub = new MysqlSubscription('errorRaising');
 players = new MysqlSubscription('allPlayers');
 myScore = new MysqlSubscription('playerScore', 'Maxwell');
 
-var expectedRows = [ // test/mysql.js :: insertSampleData()
+expectedRows = [ // test/index.es6 :: insertSampleData()
   { name: 'Planck', score: 70 },
   { name: 'Maxwell', score: 60 },
   { name: 'Leibniz', score: 50 },
