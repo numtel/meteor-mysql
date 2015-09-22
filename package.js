@@ -36,9 +36,6 @@ Package.onTest(function(api) {
     'grigio:babel@0.1.1',
     'simple:rest@0.2.3',
     'numtel:mysql',
-    'numtel:benchmark-packages@0.0.1',
-    'mongo', // for benchmark
-    'thinksoftware:mongo-direct@1.0.2' // for benchmark
   ]);
   api.use('test-helpers'); // Did not work concatenated above
   api.addFiles([
@@ -60,20 +57,5 @@ Package.onTest(function(api) {
   api.addFiles([
     'test/MysqlSubscription.js',
     'test/simple_rest.js'
-  ]);
-
-
-  // Benchmark databases
-  api.addFiles([
-    'test/benchmark/server.mongo.js',
-    'test/benchmark/server.mysql.js'
-  ], 'server');
-
-  // Benchmarks
-  api.addFiles([
-    'test/benchmark/insertMany.js'
-  ], 'client');
-  api.addFiles([
-    'test/benchmark/maxVsOrderBy.js'
   ]);
 });
