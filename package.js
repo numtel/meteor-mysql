@@ -56,6 +56,6 @@ Package.onTest(function(api) {
 
   api.addFiles([
     'test/MysqlSubscription.js',
-    'test/simple_rest.js'
+//     'test/simple_rest.js'
   ]);
 });
