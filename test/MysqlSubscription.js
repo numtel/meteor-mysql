@@ -59,14 +59,14 @@ function(test, done){
     test.equal(myScore[0].score, 60);
     if(Meteor.isClient){
       var testEl = document.getElementById('myScoreTest');
-      var testElVal = parseInt($.trim(testEl.textContent), 10);
+      var testElVal = parseInt(testEl.textContent, 10);
       test.equal(testElVal, 60, 'Reactive template');
     }
     Meteor.call('setScore', myScore[0].id, 30);
     Meteor.setTimeout(function(){
       test.equal(myScore[0].score, 30);
       if(Meteor.isClient){
-        testElVal = parseInt($.trim(testEl.textContent), 10);
+        testElVal = parseInt(testEl.textContent, 10);
         test.equal(testElVal, 30, 'Reactive template');
       }
       Meteor.call('setScore', myScore[0].id, 60);
