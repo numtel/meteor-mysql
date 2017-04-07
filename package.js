@@ -6,7 +6,7 @@ Package.describe({
 });
 
 Npm.depends({
-  'mysql': '2.10.2',
+  'mysql': '2.13.0',
   'mysql-live-select': '1.0.6'
 });
 
