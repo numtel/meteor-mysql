@@ -1,5 +1,5 @@
 # numtel:mysql [![Build Status](https://travis-ci.org/numtel/meteor-mysql.svg?branch=master)](https://travis-ci.org/numtel/meteor-mysql)
-Reactive MySQL for Meteor
+Reactive MySQL for Meteor <b>1.7</b>
 
 Provides Meteor integration of the [`mysql-live-select` NPM module](https://github.com/numtel/mysql-live-select), bringing reactive `SELECT` statement result sets from MySQL >= 5.1.15.
 
